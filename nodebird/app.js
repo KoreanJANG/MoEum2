@@ -6,10 +6,6 @@ const session = require('express-session'); // 개인의 요청을 저장한다?
 const nunjucks = require('nunjucks');
 const dotenv = require('dotenv');
 const passport = require('passport');  // 각종 페키지를 가져온다 
-const helmet = require('helmet');
-const hpp = require('hpp');
-const redis = require('redis');
-const RedisStore = require('connect-redis')(session);
 
 dotenv.config();  // dotenv 이거는 리콰이어 끝나고 바로 적어줘라. 이게 밑에 있으면 위에거는 참조 못한다 
 
