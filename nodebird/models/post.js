@@ -172,15 +172,23 @@ module.exports = class Post extends Sequelize.Model {
         type: Sequelize.STRING(2000),
         allowNull: true,
       },
+      Subtitle : {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+      },
+      Mymemo : {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+      },
+      Mythema : {
+        type: Sequelize.STRING(100),
+        allowNull: true,
+      },
       // 변경 쿼리 : ALTER TABLE posts ADD Public1 TINYINT(1) DEFAULT false NOT NULL;
       // 공개여부컬럼 -> 기본값 false
       Public: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
-      },
-      Subtitle : {
-        type: Sequelize.STRING(100),
-        allowNull: true,
       },
 
     }, {

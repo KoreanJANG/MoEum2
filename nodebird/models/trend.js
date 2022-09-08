@@ -37,6 +37,8 @@ module.exports = class Trend extends Sequelize.Model {
   }
 
   static associate(db) {
-    db.Trend.belongsTo(db.User); //게시글은 유저에 속한다. 헤즈매니하고 벨롱스투 는 같이 써주면 안햇갈린다
+    db.Trend.belongsTo(db.User, {
+      foreignKey: 'userId' // FK 컬럼명
+    }); // 트랜드는 하나의 userId에 속한다       
   }
 };
