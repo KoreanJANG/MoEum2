@@ -88,18 +88,18 @@ router.get('/', async (req, res, next) => { // Post.findAll로 해서 업로드�
         Public: true // 공개된 게시물만 출력시킨다.
       },
       order: [
-        ['createdAt', 'DESC'], // 글 작성 최신순
+        ['updatedAt', 'DESC'], // 글 작성 최신순
         [Comment, 'createdAt', 'DESC'], // 댓글 작성 최신순
         [Comment, Comment, 'createdAt', 'DESC'], // 대댓글 작성 최신순
       ],
     });
 
-    res.status(200).send('main', {
-    // res.render('main', {
-      title: 'NodeBird',
-      twits: posts,  // 찾은 게시물들은 twits로 넣어준다
-      loginUserId: req.session.passport ? req.session.passport.user : null // 현재 로그인한 유저 아이디를 세션에서가져와 view로 전달한다.
-    });
+    res.status(200).send(['main', {
+      // res.render('main', {
+        title: 'NodeBird',
+        twits: posts,  // 찾은 게시물들은 twits로 넣어준다
+        loginUserId: req.session.passport ? req.session.passport.user : null // 현재 로그인한 유저 아이디를 세션에서가져와 view로 전달한다.
+      }]);
   } catch (err) {
     console.error(err);
     next(err);
@@ -149,12 +149,12 @@ router.get('/comment', async (req, res, next) => { // Post.findAll로 해서 업
       ],
     });    
 
-    res.status(200).send('main', {
-    // res.render('main', {
-      title: 'NodeBird',
-      twits: posts,  // 찾은 게시물들은 twits로 넣어준다
-      loginUserId: req.session.passport ? req.session.passport.user : null // 현재 로그인한 유저 아이디를 세션에서가져와 view로 전달한다.
-    });
+    res.status(200).send(['main', {
+      // res.render('main', {
+        title: 'NodeBird',
+        twits: posts,  // 찾은 게시물들은 twits로 넣어준다
+        loginUserId: req.session.passport ? req.session.passport.user : null // 현재 로그인한 유저 아이디를 세션에서가져와 view로 전달한다.
+      }]);
   } catch (err) {
     console.error(err);
     next(err);
@@ -234,8 +234,7 @@ router.get('/twit/search', isLoggedIn, async (req, res) => {
     order: [['createdAt', 'DESC']], // 최신순으로 가져오도록 정렬 조건을 준다.
   });
 
-  res.status(200).send(users, searchText);
-  // res.render('twit_search', { twits: posts, searchText: searchText });
+  res.status(200).send(posts, searchText);
 });
 
 module.exports = router;

@@ -2,8 +2,10 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op
 
-const { Post, Hashtag, Comment, User, Trend, Like } = require('../models');
+const { Post, Hashtag, Comment, User, Trend, Like, Trendcomment } = require('../models');
 const { isLoggedIn } = require('./middlewares');
 const {spawn} = require("child_process");
 
@@ -138,6 +140,50 @@ router.post('/subTitle/update', isLoggedIn, async (req, res) => {
   // 수정 완료시 메인화면으로 이동시킨다.
   res.sendStatus(200);
 });
+
+/**
+ * 나만 보는 메모 수정 라우터 
+ */
+ router.post('/mymemo/update', isLoggedIn, async (req, res) => {
+  // 게시물 아이디
+  const postId = req.body.id;
+  // 부제목 내용
+  const myMemo = req.body.myMemo;
+
+  // 게시물에 해당하는 부제목을 수정한다.
+  await Post.update({
+    Mymemo: myMemo
+  }, {
+    where: {
+      id: postId
+    }
+  });
+
+  // 수정 완료시 메인화면으로 이동시킨다.
+  res.sendStatus(200);
+});
+
+/**
+ * 테마 수정 라우터 
+ */
+ router.post('/mythema/update', isLoggedIn, async (req, res) => {
+  // 게시물 아이디
+  const postId = req.body.id;
+  // 테마의 내용
+  const mythema = req.body.mythema;
+
+  // 게시물에 해당하는 부제목을 수정한다.
+  await Post.update({
+    Mythema: mythema
+  }, {
+    where: {
+      id: postId
+    }
+  });
+
+  // 수정 완료시 메인화면으로 이동시킨다.
+  res.sendStatus(200);
+});
   
 
 
@@ -206,6 +252,52 @@ router.post('/comment/child', isLoggedIn, async (req, res) => {
 });
 
 /**
+ * 트랜드의 댓글 등록
+ */
+ router.post('/trendcomment', isLoggedIn, async (req, res) => {
+  // 댓글 등록할 게시물 아이디
+  const postId = req.body.postId;
+  // 댓글내용
+  const trendcomment = req.body.trendcomment;
+  // 로그인 사용자 아이디
+  const userId = req.session.passport.user;
+
+  // 코멘트 생성
+  await Trendcomment.create({
+    userId: userId, // 작성자 유저 아이디
+    postId: postId, // 코멘트 달릴 게시물 아이디
+    trend_content: trendcomment // 코멘트 내용
+  });
+
+  res.sendStatus(200);
+});
+
+/**
+ * 트랜드 대댓글 입력
+ */
+router.post('/trendcomment/child', isLoggedIn, async (req, res) => {
+  // 게시물 아이디
+  const postId = req.body.postId;
+  // 대댓글 다는 댓글 아이디
+  const parentTrendCommentId = req.body.parentTrendCommentId;
+  // 코멘트 내용
+  const trendcomment = req.body.trendcomment;
+  // 로그인 아이디
+  const userId = req.session.passport.user;
+
+  // 대댓글 내용 저장
+  await Trendcomment.create({
+    userId: userId, // 작성자 유저 아이디
+    postId: postId, // 코멘트 달릴 게시물 아이디
+    trend_content: trendcomment, // 코멘트 내용
+    parentId: parentTrendCommentId // 대댓글의 경우 대댓글의 부모 댓글 아이디
+  });
+
+  res.sendStatus(200);
+});
+
+
+/**
  * 좋아요/싫어요 등록
  */
 router.post('/like', isLoggedIn, async (req, res) => {
@@ -232,6 +324,7 @@ router.post('/like', isLoggedIn, async (req, res) => {
   res.sendStatus(200);
 });
 
+// 좋아요 삭제 기능  
 router.post('/like/delete', isLoggedIn, async (req, res) => {
   // 댓글 등록할 게시물 아이디
   const postId = req.body.postId;
@@ -337,12 +430,35 @@ router.post('/copy', isLoggedIn, async (req, res) => {
 });
 
 
+/**
+ * 좋아요, 취소 라우터 
+ */
+// router.post('/:id/like', async (req, res, next) => {
+//   try {
+//     const user = await Post.find({ where : { id: req.params.id}});
+//     await post.addLiker(req.user.id);
+//     res.send('ok');
+//   } catch (error) {
+//     console.error(error);
+//     next(error);
+//   }
+// });
+
+// router.delete('/:id/like', async (req, res, next) => {
+//   try {
+//     const post = await Post.find({ where: { id: req.params.id}});
+//     await post.
+//   }
+// })  ......작성 중 
+
+
+
 // 트랜드 업로드 부분
 const upload3 = multer();
 router.post('/trend', isLoggedIn, upload3.none(), async (req, res, next) => { 
   try {
     console.log(req.user);
-    const trends = await Trend.create({ // await가 있으면 위에 반드시 async가 있어야 한다 
+    const trend = await Trend.create({ // await가 있으면 위에 반드시 async가 있어야 한다 
       Trend_Thumbnail_image: req.body.Trend_Thumbnail_image,
       Trend_Title: req.body.Trend_Title,
       Trend_SubTitle: req.body.Trend_SubTitle,
@@ -353,7 +469,7 @@ router.post('/trend', isLoggedIn, upload3.none(), async (req, res, next) => {
   } catch (error) {
     console.error(error);
     next(error);
-    }
+  }
 });
 
 // 트랜드 불러오기 라우터 
@@ -366,7 +482,7 @@ router.get('/trend', async (req, res, next) => { // Post.findAll로 해서 업�
           attributes: ['id', 'nick'],
         },
         {
-          model: Comment, // 댓글도 게시물을 가져올때 같이 가져온다. -> post.Comments 로 접근한다.
+          model: Trendcomment, // 
           required: false, // 댓글이 게시물에 존재하지 않을수 있으므로 false로 설정한다.
           where: {
             parentId: { // parentId가 없는 댓글은 대댓글이 아니므로 parentId 가 null인 글만 가져온다.
@@ -379,7 +495,7 @@ router.get('/trend', async (req, res, next) => { // Post.findAll로 해서 업�
               attributes: ['userid'], // User테이블에서 userid만 조회한다.
             },
             {
-              model: Comment, // 댓글의 댓글(대댓글)을 가져오기 위한 댓글에 속한 댓글을 가져온다.
+              model: Trendcomment, // 댓글의 댓글(대댓글)을 가져오기 위한 댓글에 속한 댓글을 가져온다.
               include: {
                 model: User, // 대댓글을 작성한 사용자의 정보를 가져온다.
                 attributes: ['userid'], // User테이블에서 userid만 조회한다.
@@ -390,16 +506,17 @@ router.get('/trend', async (req, res, next) => { // Post.findAll로 해서 업�
       ],
       order: [
         ['createdAt', 'DESC'], // 글 작성 최신순
-        [Comment, 'createdAt', 'DESC'], // 댓글 작성 최신순
-        [Comment, Comment, 'createdAt', 'DESC'], // 대댓글 작성 최신순
+        [Trendcomment, 'createdAt', 'DESC'], // 댓글 작성 최신순
+        [Trendcomment, Trendcomment, 'createdAt', 'DESC'], // 대댓글 작성 최신순
       ],
     });
 
-    res.sendStatus(200). send('main', {
-      title: 'NodeBird',
-      twits: trends,  // 찾은 게시물들은 twits로 넣어준다
-      loginUserId: req.session.passport ? req.session.passport.user : null // 현재 로그인한 유저 아이디를 세션에서가져와 view로 전달한다.
-    });
+    res.status(200).send(['main', {
+      // res.render('main', {
+        title: 'NodeBird',
+        twits: trends,  // 찾은 게시물들은 twits로 넣어준다
+        loginUserId: req.session.passport ? req.session.passport.user : null // 현재 로그인한 유저 아이디를 세션에서가져와 view로 전달한다.
+      }]);
   } catch (err) {
     console.error(err);
     next(err);

@@ -10,7 +10,7 @@ router.post('/:id/follow', isLoggedIn, async (req, res, next) => {  // 이미 ap
     const user = await User.findOne({ where: { id: req.user.id } });
     if (user) {
       await user.addFollowing(parseInt(req.params.id, 10));
-      res.status(200).send('success');
+      res.send('success');
     } else {
       res.status(404).send('no user');
     }

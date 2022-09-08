@@ -56,7 +56,7 @@ router.post('/login', isNotLoggedIn, (req, res, next) => { //프론트에서 aut
 router.get('/logout', isLoggedIn, (req, res) => {
   req.logout();
   req.session.destroy();  // 세션쿠키를 세션에서 지운다. 세션 자체를 파괴한다 
-  res.redirect('/');
+  res.status(200).send("ok");
 });
 
 //회원정보 수정 
@@ -95,7 +95,7 @@ router.get('/kakao', passport.authenticate('kakao'));  //카카오전략.js로 �
 router.get('/kakao/callback', passport.authenticate('kakao', {
   failureRedirect: '/',
 }), (req, res) => {
-  res.redirect('/');
+  res.status(200).send("ok");
 });
 
 //네이버로그인
@@ -105,7 +105,7 @@ router.get('/naver', passport.authenticate('naver', { authType: 'reprompt' })); 
 router.get('/naver/callback', passport.authenticate('naver', { // 그리고 passport 로그인 전략에 의해 naverStrategy로 가서 카카오계정 정보와 DB를 비교해서 회원가입시키거나 로그인 처리하게 한다
   failureRedirect: '/',
 }), (req, res) => {
-  res.redirect('/');
+  res.status(200).send("ok");
 });
 
 module.exports = router;
