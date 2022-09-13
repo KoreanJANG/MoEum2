@@ -27,6 +27,7 @@ module.exports = () => {
           provider: 'naver',
         });
         done(null, newUser);
+        res.status(200).send('newUser');
       }
     } catch (error) {
       console.error(error);
