@@ -20,7 +20,28 @@ router.post('/:id/follow', isLoggedIn, async (req, res, next) => {  // 이미 ap
   }
 });
 
-// 아래 부분은 자바스크립트에서 컨맨드 명령어를 보낼 수 있는 부분이다 
-// 
+/**
+ * nick(이름) 수정 라우터 
+ */
+ router.post('/nickupdate', isLoggedIn, async (req, res) => {
+  // 닉 내용
+  const nick = req.body.nick;
+  const userId = req.session.passport.user;
+
+  // 닉을 수정한다 
+  await User.update({
+    nick: nick
+  },
+  {
+    where: {
+      id: userId
+    }
+  }
+  );
+
+  // 수정 완료시 메인화면으로 이동시킨다.
+  res.sendStatus(200);
+});
+
 
 module.exports = router;
