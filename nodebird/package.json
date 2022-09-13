@@ -4,12 +4,13 @@
   "description": "익스프레스로 만드는 SNS 서비스",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app",
+    "start": "start nodemon app",
     "test": "jest"
   },
   "author": "ZeroCho",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
     "cookie-parser": "^1.4.5",
     "dotenv": "^8.2.0",
@@ -23,8 +24,10 @@
     "passport-kakao": "^1.0.0",
     "passport-local": "^1.0.0",
     "passport-naver-v2": "^2.0.8",
+    "pm2": "^5.2.0",
     "sequelize": "^6.3.5",
-    "sequelize-cli": "^6.2.0"
+    "sequelize-cli": "^6.2.0",
+    "sequelize-cursor-pagination": "^3.0.2"
   },
   "devDependencies": {
     "jest": "^28.1.3",

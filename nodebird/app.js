@@ -58,7 +58,6 @@ app.use('/', pageRouter);     // page.js 가 거의 인덱스나 메인 부분�
 app.use('/auth', authRouter);
 app.use('/post', postRouter);
 app.use('/user', userRouter);
-app.use('/page', pageRouter);
 
 app.use((req, res, next) => {  //라우터에서 요청을 처리할 수 없는 경우 아래가 실행. 이때 미들웨어 쪽은 꼭 next 붙여야 한다 
   const error =  new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
