@@ -30,13 +30,13 @@ module.exports = class Like extends Sequelize.Model {
      */
     static associate(db) {
         // 좋아요는 질문하기 게시글에 속해있다.
-        db.Like.belongsTo(db.Post, {
-            foreignKey: 'postId'
+        db.Like.belongsTo(db.Question, {
+            foreignKey: 'questionId'
         });
-        // 하나의 글은 여러개의 좋아요를 가지고있다 (일대다)
-        db.Post.hasMany(db.Like, {
+        // 하나의 질문하기는 여러개의 좋아요를 가지고있다 (일대다)
+        db.Question.hasMany(db.Like, {
             foreignKey: { // FK 설정
-                name: 'postId', // FK 컬럼명
+                name: 'questionId', // FK 컬럼명
                 allowNull: false // 좋아요는 반드시 포스트아이디를 가지고 있어야한다.
             }
         });

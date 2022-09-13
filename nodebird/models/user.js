@@ -57,6 +57,7 @@ module.exports = class User extends Sequelize.Model {
 
   static associate(db) {  // 모델들간의 관계들을 associate를 써서 작성한다 
     db.User.hasMany(db.Post); // 유저는 많은 게시글을 가진다 
+    db.User.hasMany(db.Question);
     db.User.belongsToMany(db.User, {
       foreignKey: 'followingId', // foreignKey랑 as는 반대의미 
       as: 'Followers', // 팔로워를 가져올때  

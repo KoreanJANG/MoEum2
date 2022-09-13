@@ -18,7 +18,7 @@ module.exports = class Comment extends Sequelize.Model {
             underscored: false,
             modelName: 'Comment',
             tableName: 'comments',
-            paranoid: false, // 살제로 삭제한다.
+            paranoid: false, // 실제로 삭제한다.
             charset: 'utf8',  // 한글
             collate: 'utf8_general_ci',
         });
@@ -29,14 +29,14 @@ module.exports = class Comment extends Sequelize.Model {
      * @param db
      */
     static associate(db) {
-        // 코멘트는 작성된 글에 속해있다.
-        db.Comment.belongsTo(db.Post, {
-            foreignKey: 'postId'
+        // 코멘트는 질문하기에 속해있다.
+        db.Comment.belongsTo(db.Question, {
+            foreignKey: 'questionId'
         });
-        // 하나의 글은 여러개의 코멘트를 가지고있다 (일대다)
-        db.Post.hasMany(db.Comment, {
+        // 하나의 질문하기는 여러개의 코멘트를 가지고있다 (일대다)
+        db.Question.hasMany(db.Comment, {
             foreignKey: { // FK 설정
-                name: 'postId', // FK 컬럼명
+                name: 'questionId', // FK 컬럼명
                 allowNull: false // 코멘트는 글아이디를 가지고 있어야한다.
             }
         });

@@ -7,7 +7,9 @@ const Hashtag = require('./hashtag');
 const Comment = require('./comment');
 const Like = require('./like');
 const Trend = require('./trend');
-const Trendcomment = require('./trendcomment')  // 
+const Trendcomment = require('./trendcomment')
+const Question = require('./question');
+const Declareban = require('./declareban')
 
 const db = {};
 const sequelize = new Sequelize(
@@ -22,6 +24,8 @@ db.Comment = Comment;
 db.Like = Like;
 db.Trend = Trend;
 db.Trendcomment = Trendcomment;
+db.Question = Question;
+db.Declareban = Declareban;
 
 User.init(sequelize);
 Post.init(sequelize);
@@ -30,6 +34,8 @@ Comment.init(sequelize);
 Like.init(sequelize);
 Trend.init(sequelize);
 Trendcomment.init(sequelize);
+Question.init(sequelize);
+Declareban.init(sequelize);
 
 User.associate(db);
 Post.associate(db);
@@ -38,5 +44,7 @@ Comment.associate(db);
 Like.associate(db);
 Trend.associate(db);
 Trendcomment.associate(db);
+Question.associate(db);
+Declareban.associate(db);
 
 module.exports = db;
