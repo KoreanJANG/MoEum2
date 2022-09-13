@@ -4,6 +4,9 @@
 <div class="timeline">
     <div class="followings half">
         <h2>내 컨텐트 목록</h2>
+        <a id="mypublic" href="/myquestion" class="btn">내 질문보기</a>
+        <a id="mycomments" href="/mycomments" class="btn">내 댓글보기</a>
+        <a id="mylikes" href="/mylikes" class="btn">내가 좋아요 한거 보기</a>
         <table style="border: 1px black solid; margin-top: 10px">
             <thead>
             <tr>
@@ -15,7 +18,7 @@
                 <th width="10%">User_url</th>
                 <th width="15%">Title</th>
                 <th width="15%">SubTitle</th>
-                <th width="10%">공개여부</th>
+                <th width="10%">질문하기</th>
                 <th width="10%">삭제</th>
             </tr>
             </thead>
@@ -30,13 +33,11 @@
                 <td> {{twit.User_url}} </td>
                 <td> {{twit.Title}} </td>
                 <td> {{twit.Subtitle}} </td>
-                <td onclick="changePostPublic({{twit.id}}, {{twit.Public}})">
-                    {% if twit.Public === true %} O
-                    {% else %} X
-                    {% endif %}
+                <td>
+                <button onclick="createPostQuestion({{twit.id}}/*, {{twit.Public}}*/)">질문하기 생성</button>
                 </td>
-                <td> <button onclick="deletePost({{twit.id}})">삭제</button> </td>
-            </tr>
+            <td> <button onclick="deletePost({{twit.id}})">삭제</button> </td>
+        </tr>
             {% endfor %}
             </tbody>
         </table>
@@ -72,27 +73,32 @@
     }
 
     // 게시물 아이디와 게시물 공개 여부를 받아 서버에 요청하여 DB데이터를 변경한다.
-    async function changePostPublic(id, isPublic) {
+    // 게시물 아이디를 받아서 부제목과 내용을 받아 Question 테이블에 입력한다.
+    async function createPostQuestion(id/*, isPublic*/) {
         // 공개 처리시일때만 부제목을 입력받는다.
-        let subTitle;
-        if (!isPublic === true) {
-            subTitle = prompt('부제목을 입력해주세요.');
-            if (subTitle == null || subTitle.length === 0) {
-                alert('부제목을 입력해야만 공개가 가능합니다.');
-                return;
-            }
+        const subTitle = prompt('질문 부제목을 입력해주세요.');
+        if (subTitle == null || subTitle.length === 0) {
+            alert('부제목을 입력해야만 질문 생성이 가능합니다.');
+            return;
         }
 
-        axios.post('/post/change/public', {
-            id: id, // 변경할 post id
-            isPublic: !isPublic, // 공개 여부 (현재와 반대로 넣어준다. - 느낌표 용도 (https://hanamon.kr/javascript-logical-not-operator/))
-            subTitle: subTitle
+        const contents = prompt('질문 내용을 입력해주세요.');
+        if (contents == null || contents.length === 0) {
+            alert('질문 내용을 입력해야만 질문 생성이 가능합니다.');
+            return;
+        }
+
+        axios.post('/post/question/ask', {
+            id: id, // 질문할 게시물 아이디
+            // isPublic: !isPublic, // 공개 여부 (현재와 반대로 넣어준다. - 느낌표 용도 (https://hanamon.kr/javascript-logical-not-operator/))
+            subTitle: subTitle, // 질문 부제목
+            contents: contents // 질문 내용
         })
         .then((res) => {
             if (res.status === 200) { // 서버 요청이 정상적으로 되었으면 페이지 새로고침한다.
-                location.reload();
+                alert('생성이 완료되었습니다.');
             } else { // 서버 요청이 정상 응답하지 않는다면 경고창을 띄운다.
-                alert('공개여부 업데이트를 실패하였습니다. 재시도해주세요.');
+                alert('질문 생성을 실패하였습니다. 재시도해주세요.');
             }
         })
         .catch((error) => {

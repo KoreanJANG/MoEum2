@@ -13,26 +13,38 @@
         <div class="profile">
           {% if user and user.id %}
             <div class="user-name">{{'안녕하세요! ' + user.nick + '님'}}</div>
-            <div class="half">
+            <!-- <div class="half">
               <div>팔로잉</div>
               <div class="count following-count">{{followingCount}}</div>
             </div>
             <div class="half">
               <div>팔로워</div>
               <div class="count follower-count">{{followerCount}}</div>
-            </div>
+            </div> -->
           <input id="my-id" type="hidden" value="{{user.id}}">
           <a id="my-profile" href="/profile" class="btn">내 프로필</a>
           <a id="logout" href="/auth/logout" class="btn">로그아웃</a>
           <a id="mycontents" href="/mycontents" class="btn">내 컨텐츠보기</a>
           <a id="search" href="/user/search" class="btn">사용자 검색</a>
-          <a id="search" href="/twit/search" class="btn">게시물 검색</a>
+          <a id="search" href="/twit/search" class="btn">질문 검색</a>
+          <a id="search" href="/mytwit/search" class="btn">나의저장 검색</a>
+          <a id="search" href="/trend/search" class="btn">트랜드 검색</a>
           <a id="delete" href="/auth/delete" class="btn">회원탈퇴</a>
           <a id="trend" href="/post/trend" class="btn">트랜드</a>
       
-          <form method="get" action="/auth/update">
+          <form method="post" action="/user/nickupdate">
             <input id="nick" type="text" name="nick"/>
             <button type="submit"> 닉네임변경 </button>
+          </form>
+
+          <form method="get" action="/other/public">
+            <input id="userid" type="text" name="userid"/>
+            <button type="submit"> 다른사용자 질문 </button>
+          </form>
+
+          <form method="get" action="/other/comments">
+            <input id="userid" type="text" name="userid"/>
+            <button type="submit"> 다른사용자 댓글 </button>
           </form>
 
         {% else %}

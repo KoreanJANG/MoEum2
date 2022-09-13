@@ -3,7 +3,7 @@
 {% block content %}
     <div class="timeline">
       {% if user %}
-        <div>
+        <!-- <div>
           <form id="twit-form" action="/post" method="post" enctype="multipart/form-data">
             <div>텍스트</div>
             <div class="input-group">
@@ -43,7 +43,7 @@
               <button id="twit-btn" type="submit" class="btn">짹짹</button>
             </div>
           </form>
-        </div>
+        </div> -->
       {% endif %}
       <div class="twits">
         <form id="hashtag-form" action="/hashtag">
@@ -67,6 +67,8 @@
               <th width="20%">Comment</th>
               <th width="10%">좋아요</th>
               <th width="10%">싫어요</th>
+              <th width="10%">신고하기</th>
+              <th width="10%">삭제</th>
 
             </tr>
             </thead>
@@ -84,7 +86,7 @@
                     <!-- 내글일 경우 부제목을 수정할 수 있게 텍스트박스를 출력시킨다. -->
                     {% if loginUserId != null and twit.User.id === loginUserId %}
                       <form action="/post/subTitle/update" method="post">
-                        <input type="text" name="subTitle" value="{{twit.Subtitle}}" />
+                        <input type="text" name="QuestionSubtitle" value="{{twit.QuestionSubtitle}}" />
                         <input type="hidden" name="id" value="{{twit.id}}"/>
                         <button type="submit">수정</button>
                       </form>
@@ -105,7 +107,7 @@
                     <!-- /post/comment 로 댓글 등록 요청을 보낸다. -->
                     <form method="post" action="/post/comment">
                       <!-- 댓글 다는 게시물 아이디 -->
-                      <input type="hidden" name="postId" value="{{twit.id}}" />
+                      <input type="hidden" name="questionId" value="{{twit.id}}" />
                       <!-- 댓글 내용 -->
                       <input type="text" name="comment" />
                       <button type="submit">댓글 작성</button>
@@ -135,6 +137,18 @@
                       {% if twit.Likes[0].like == false %}
                       <button onclick="deleteLike({{twit.id}})">취소</button>
                       {% endif %}
+                    {% endif %}
+                  </td>
+                  <td>
+                    <!-- 로그인 하지 않은 사용자는 신고 버튼 출력 안함 -->
+                    {% if loginUserId != null %}
+                        <button onclick="declareQuestion({{twit.id}}, '경박스러움')">신고</button>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <!-- 퀘스천 자체가 내글이면 삭제가능 -->
+                    {% if loginUserId === question.userId or loginUserId === twit.User.id %}
+                    <button onclick="deleteQuestion({{question.id}})">삭제</button>
                     {% endif %}
                   </td>
                   
@@ -170,13 +184,19 @@
                             <!-- /post/comment/child 으로 대댓글 등록 요청을 보낸다. -->
                             <form method="post" action="/post/comment/child">
                               <!-- 댓글 다는 게시물 아이디 -->
-                              <input type="hidden" name="postId" value="{{twit.id}}" />
+                              <input type="hidden" name="questionId" value="{{twit.id}}" />
                               <!-- 대댓글다는 댓글 아이디 -->
                               <input type="hidden" name="parentCommentId" value="{{comment.id}}" />
                               <!-- 댓글 내용 -->
                               <input type="text" name="comment" />
                               <button type="submit">대댓글 작성</button>
                             </form>
+                          </td>
+                          <td>
+                            <!-- 로그인 하지 않은 사용자는 신고 버튼 출력 안함 -->
+                            {% if loginUserId != null %}
+                                <button onclick="declareComment({{comment.id}}, '경박스러움')">신고</button>
+                            {% endif %}
                           </td>
                         </tr>
                       <!-- 대댓글 구역 -->
@@ -202,6 +222,12 @@
                                   <!-- 대댓글이 내글이거나 코멘트 달리 글 자체가 내글이면 삭제가능 -->
                                   {% if loginUserId === childComment.userId or loginUserId === twit.User.id %}
                                   <button onclick="deleteComment({{childComment.id}})">삭제</button>
+                                  {% endif %}
+                                </td>
+                                <td>
+                                  <!-- 로그인 하지 않은 사용자는 신고 버튼 출력 안함 -->
+                                  {% if loginUserId != null %}
+                                      <button onclick="declareComment({{childComment.id}}, '경박스러움')">신고</button>
                                   {% endif %}
                                 </td>
                               </tr>
@@ -291,7 +317,7 @@
     function deleteComment(commentId) {
       // /post/comment/delete 에 commentId를 넘겨 댓글 삭제를 요청한다.
       axios.post('/post/comment/delete', {
-        commentId, commentId
+        commentId: commentId
       })
       .then((res) => {
         if (res.status === 200) { // 서버 요청이 정상적으로 되었으면 페이지 새로고침한다.
@@ -312,9 +338,9 @@
       });
     }
 
-    function copyPosts(postId) {
+    function copyPosts(questionId) {
       axios.post('/post/copy', {
-        postId: postId
+        questionId: questionId
       })
       .then((res) => {
         if (res.status === 200) { // 서버 요청이 정상적으로 되었으면 페이지 새로고침한다.
@@ -335,9 +361,9 @@
       });
     }
 
-    function likePost(postId, like) {
+    function likePost(questionId, like) {
       axios.post('/post/like', {
-        postId: postId,
+        questionId: questionId,
         like: like
       })
       .then((res) => {
@@ -359,9 +385,9 @@
       });
     }
 
-    function deleteLike(postId) {
+    function deleteLike(questionId) {
       axios.post('/post/like/delete', {
-        postId: postId
+        questionId: questionId
       })
       .then((res) => {
         if (res.status === 200) { // 서버 요청이 정상적으로 되었으면 페이지 새로고침한다.
@@ -381,6 +407,79 @@
         }
       });
     }
+
+    function declareQuestion(questionId, text) {  //  => 여기서부터 작업하라
+      axios.post('/auth/declare/question', {
+        questionid: questionId,
+        text: text,
+      })
+      .then((res) => {
+        if (res.status === 200) { // 서버 요청이 정상적으로 되었으면 페이지 새로고침한다.
+          location.reload();
+        } else { // 서버 요청이 정상 응답하지 않는다면 경고창을 띄운다.
+          alert('신고처리 에러');
+        }
+      })
+      .catch(error => {
+        // 에러 발생시 에러 데이터를 가져온다.
+        const errorData = error.response.data;
+        // 에러 데이터에 메시지가 존재하면 메시지를 경고창에 출력하고 없으면 기본 메시지를 출력한다.
+        if (errorData != null && errorData.message != null) {
+          alert(errorData.message);
+        } else {
+          alert('신고처리 에러');
+        }
+      });
+    }
+
+    function declareComment(commentId, text) {  //
+      axios.post('/auth/declare/question/comment', {
+        commentId: commentId,
+        text: text,
+      })
+      .then((res) => {
+        if (res.status === 200) { // 서버 요청이 정상적으로 되었으면 페이지 새로고침한다.
+          location.reload();
+        } else { // 서버 요청이 정상 응답하지 않는다면 경고창을 띄운다.
+          alert('신고처리 에러');
+        }
+      })
+      .catch(error => {
+        // 에러 발생시 에러 데이터를 가져온다.
+        const errorData = error.response.data;
+        // 에러 데이터에 메시지가 존재하면 메시지를 경고창에 출력하고 없으면 기본 메시지를 출력한다.
+        if (errorData != null && errorData.message != null) {
+          alert(errorData.message);
+        } else {
+          alert('신고처리 에러');
+        }
+      });
+    }
+
+    function deleteQuestion(questionId) {
+      axios.post('/post/question/delete', {
+        questionId: questionId
+      })
+      .then((res) => {
+        if (res.status === 200) { // 서버 요청이 정상적으로 되었으면 페이지 새로고침한다.
+          location.reload();
+        } else { // 서버 요청이 정상 응답하지 않는다면 경고창을 띄운다.
+          alert('삭제를 실패하였습니다.');
+        }
+      })
+      .catch(error => {
+        // 에러 발생시 에러 데이터를 가져온다.
+        const errorData = error.response.data;
+        // 에러 데이터에 메시지가 존재하면 메시지를 경고창에 출력하고 없으면 기본 메시지를 출력한다.
+        if (errorData != null && errorData.message != null) {
+          alert(errorData.message);
+        } else {
+          alert('삭제를 실패하였습니다.');
+        }
+      });
+    }
+
+    
   </script>
 
 {% endblock %}

@@ -18,6 +18,7 @@
                 <th width="10%">snsId</th>
                 <th width="10%">createdAt</th>
                 <th width="10%">updatedAt</th>
+                <th width="20%">차단</th>
             </tr>
             </thead>
             <tbody style="text-align: center">
@@ -30,6 +31,10 @@
                 <td> {{user.snsId}} </td>
                 <td> {{user.createdAt}} </td>
                 <td> {{user.updatedAt}} </td>
+                <td>
+                    <button onclick="banUser({{user.id}})">차단한다</button>
+                </td>
+
             </tr>
             {% endfor %}
             </tbody>
@@ -38,5 +43,27 @@
 </div>
 
 <script type="text/javascript">
+        function banUser(banid) {  //
+      axios.post('/auth/ban/user', {
+        banid: banid,
+      })
+      .then((res) => {
+        if (res.status === 200) { // 서버 요청이 정상적으로 되었으면 페이지 새로고침한다.
+          location.reload();
+        } else { // 서버 요청이 정상 응답하지 않는다면 경고창을 띄운다.
+          alert('차단처리 에러');
+        }
+      })
+      .catch(error => {
+        // 에러 발생시 에러 데이터를 가져온다.
+        const errorData = error.response.data;
+        // 에러 데이터에 메시지가 존재하면 메시지를 경고창에 출력하고 없으면 기본 메시지를 출력한다.
+        if (errorData != null && errorData.message != null) {
+          alert(errorData.message);
+        } else {
+          alert('신고처리 에러');
+        }
+      });
+    }
 </script>
 {% endblock %}
