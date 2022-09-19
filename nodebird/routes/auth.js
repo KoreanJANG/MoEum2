@@ -114,6 +114,23 @@ router.get('/delete', isLoggedIn, async(req, res, next) => {
   // res.redirect('/');
 });
 
+// 퀘스천 신고의 해제(삭제)
+router.post('/declare/question/delete', isLoggedIn, async (req, res) => {
+  // 신고해제할 신고의 아이디
+  const declarequestionid = req.body.declarequestionid;
+  // 로그인 사용자 아이디
+  const userId = req.session.passport.user;
+
+  // 기존에 신고의 데이터가 있으면 삭제처리한다.
+  const declareData = await Declareban.findOne({ where: { userId: userId, declarequestionid: declarequestionid } });
+  if (declareData != null) {
+    await declareData.destroy();
+  }
+
+  res.sendStatus(200);
+});
+
+
 /**
  * 퀘스천 댓글 대댓글의 신고 생성 
  */
@@ -134,6 +151,22 @@ router.get('/delete', isLoggedIn, async(req, res, next) => {
 
   res.sendStatus(200);
   // res.redirect('/');
+});
+
+// 퀘스천댓글의 신고의 해제(삭제)
+router.post('/declare/question/comment/delete', isLoggedIn, async (req, res) => {
+  // 신고해제할 신고의 아이디
+  const declarecommentid = req.body.declarecommentid;
+  // 로그인 사용자 아이디
+  const userId = req.session.passport.user;
+
+  // 기존에 신고의 데이터가 있으면 삭제처리한다.
+  const declareData = await Declareban.findOne({ where: { userId: userId, declarecommentid: declarecommentid } });
+  if (declareData != null) {
+    await declareData.destroy();
+  }
+
+  res.sendStatus(200);
 });
 
 /**
@@ -157,6 +190,22 @@ router.get('/delete', isLoggedIn, async(req, res, next) => {
   // res.redirect('/');
 });
 
+// 트랜드댓글의 신고의 해제(삭제)
+router.post('/declare/trend/comment/delete', isLoggedIn, async (req, res) => {
+  // 신고해제할 신고의 아이디
+  const declaretrendcommentid = req.body.declaretrendcommentid;
+  // 로그인 사용자 아이디
+  const userId = req.session.passport.user;
+
+  // 기존에 신고의 데이터가 있으면 삭제처리한다.
+  const declareData = await Declareban.findOne({ where: { userId: userId, declaretrendcommentid: declaretrendcommentid } });
+  if (declareData != null) {
+    await declareData.destroy();
+  }
+
+  res.sendStatus(200);
+});
+
 /**
  * 사용자가 사용자 차단  
  */
@@ -174,6 +223,23 @@ router.get('/delete', isLoggedIn, async(req, res, next) => {
   res.sendStatus(200);
   // res.redirect('/');
 });
+
+// 사용자 차단의 해제(삭제)
+router.post('/ban/delete', isLoggedIn, async (req, res) => {
+  // 차단해제할 아이디
+  const banid = req.body.banid;
+  // 로그인 사용자 아이디
+  const userId = req.session.passport.user;
+
+  // 기존에 신고의 데이터가 있으면 삭제처리한다.
+  const declareData = await Declareban.findOne({ where: { userId: userId, banid: banid } });
+  if (declareData != null) {
+    await declareData.destroy();
+  }
+
+  res.sendStatus(200);
+});
+
 
 
 
