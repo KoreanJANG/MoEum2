@@ -35,8 +35,24 @@
           <a id="Terms" href="/views/Terms" class="btn">약관보기</a>
           <a id="trend" href="/views/trend1" class="btn">트랜드1</a>
           <a id="trend" href="/views/trend2" class="btn">트랜드2</a>
+          <br/>
+          <a id="declare" href="/mydeclare" class="btn">신고 리스트</a>
+          <a id="ban" href="/myban" class="btn">차단 리스트</a>
 
-
+          <form id="login-form" action="/auth/login" method="post">
+            <div class="input-group">
+              <label for="userid">아이디</label>
+              <input id="userid" type="userid" name="userid" required autofocus value="test">
+            </div>
+            <div class="input-group">
+              <label for="password">비밀번호</label>
+              <input id="password" type="password" name="password" required value="test">
+            </div>
+            <a id="join" href="/join" class="btn">회원가입</a>
+            <button id="login" type="submit" class="btn">로그인</button>
+            <a id="kakao" href="/auth/kakao" class="btn">카카오톡</a>
+            <a id="naver" href="/auth/naver" class="btn">네이버로그인</a>
+          </form>
       
           <form method="post" action="/user/nickupdate">
             <input id="nick" type="text" name="nick"/>
