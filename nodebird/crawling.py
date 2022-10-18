@@ -33,7 +33,7 @@ import random
 
 # data - mysql DB 접속 #라니 오픈
 try:
-    db = pymysql.connect(host="moum3.cjk00gposwcb.ap-northeast-2.rds.amazonaws.com", user='admin', password='fnucni1234!', db='moumtest1', charset='utf8mb4')
+    db = pymysql.connect(host="moum3.cjk00gposwcb.ap-northeast-2.rds.amazonaws.com", user='admin', password='fnucni1234!', db='moum', charset='utf8mb4')
     cur = db.cursor()
 
 except Exception as e:
@@ -91,8 +91,8 @@ UserId = sys.argv[2]
 
 start = time.time()  # 시작 시간 저장
 
-# # 제이 오픈, 라니 클로즈
-# # UserId = "test"
+# 제이 오픈, 라니 클로즈
+# UserId = "test"
 # User_url = input('')
 
 # 디폴트값 설정  #라니 경로값 수정해야 함(서버 내 썸네일 파일 저장 필요)
@@ -253,7 +253,7 @@ print("User_url_list_Distributor는 ", User_url_list_Distributor)
 
 # 설명 2번
 # Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
-#제이 경로
+# #제이 경로
 # with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221018_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 #토니 경로
@@ -659,7 +659,7 @@ try:
             '''
             현재 가중치
             1. tag(og, twitter, title) 순: 0 / 0 / 0 점
-            2. len max 순: 5 / 3 / 1 점
+            2. len max 순: 8 / 3 / 1 점
             3. count max 순: 8 / 6 / 4 점
             '''
             # basic 가중치 : og / twitter / title (우선은 이 가중치는 적용하지 않기로 함(9.22)) #적용 필요: 피터팬
@@ -686,21 +686,21 @@ try:
             Title_key_ordered_basic1 = Title_key_ordered_basic.most_common()[0]
 
             Title_key_ordered_basic1_list = list(Title_key_ordered_basic1)
-            Title_key_ordered_basic1_list[1] = 10
+            Title_key_ordered_basic1_list[1] = 0
             Title_key_ordered_basic1_changed = tuple(Title_key_ordered_basic1_list)
     #         print('changed', Title_key_ordered_basic1_changed)
             try:
                 Title_key_ordered_basic2 = Title_key_ordered_basic.most_common()[1]
 
                 Title_key_ordered_basic2_list = list(Title_key_ordered_basic2)
-                Title_key_ordered_basic2_list[1] = 8
+                Title_key_ordered_basic2_list[1] = 0
                 Title_key_ordered_basic2_changed = tuple(Title_key_ordered_basic2_list)
     #             print('changed', Title_key_ordered_basic2_changed)
                 try:
                     Title_key_ordered_basic3 = Title_key_ordered_basic.most_common()[2]
 
                     Title_key_ordered_basic3_list = list(Title_key_ordered_basic3)
-                    Title_key_ordered_basic3_list[1] = 6
+                    Title_key_ordered_basic3_list[1] = 0
                     Title_key_ordered_basic3_changed = tuple(Title_key_ordered_basic3_list)
     #                 print('changed', Title_key_ordered_basic3_changed)
                 except:
@@ -713,7 +713,7 @@ try:
             Title_key_ordered_len1 = Title_key_ordered_len.most_common()[0]
 
             Title_key_ordered_len1_list = list(Title_key_ordered_len1)
-            Title_key_ordered_len1_list[1] = 5
+            Title_key_ordered_len1_list[1] = 8
             Title_key_ordered_len1_changed = tuple(Title_key_ordered_len1_list)
     #         print('changed', Title_key_ordered_len1_changed)
             try:
@@ -5826,7 +5826,7 @@ if Type_key == '위시':
 
                     script = soup.select_one('script[type="application/json"]').text
                     dict_result_script_text = json.loads(str(script))
-                    naver_shopping_list_dict_list =  dict_result_script_text['props']['pageProps']['initialState']['products']['list'][0:]
+                    naver_shopping_list_dict_list = dict_result_script_text['props']['pageProps']['initialState']['products']['list'][0:]
                     if naver_shopping_list_dict_list:
                         for naver_shopping_list_dict_list_item in naver_shopping_list_dict_list:
                             naver_shopping_list_dict_list_item = naver_shopping_list_dict_list_item['item']
@@ -5899,58 +5899,64 @@ if Type_key == '위시':
         #             print("네이버 쇼핑 최저가는, ", Lower_price_searched_key)
 
                 except: #naver_open_api - 25,000회/1일 접속 가능
-                    print('naver_open_api 접속 시도')
-                    naver_open_api = 'https://openapi.naver.com/v1/search/shop.json?query=' + Title_chosen_key + '&display=1'
-                    print('naver_open_api? ', naver_open_api)
-#                     headers_naver_open_api = {'user-agent': generate_user_agent(device_type='smartphone'), "X-Naver-Client-Id":'kGjLkvRUDvR3yo09JJoV', "X-Naver-Client-Secret":'NLXuKVy6GG'}
-                    headers_naver_open_api = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36', 
-                                              "X-Naver-Client-Id":'kGjLkvRUDvR3yo09JJoV', "X-Naver-Client-Secret":'NLXuKVy6GG'}
-                    res_api = requests.get(naver_open_api, headers=headers_naver_open_api)
+                    try:
+                        print('naver_open_api 접속 시도')
+                        naver_open_api = 'https://openapi.naver.com/v1/search/shop.json?query=' + Title_chosen_key + '&display=1'
+                        print('naver_open_api? ', naver_open_api)
+    #                     headers_naver_open_api = {'user-agent': generate_user_agent(device_type='smartphone'), "X-Naver-Client-Id":'kGjLkvRUDvR3yo09JJoV', "X-Naver-Client-Secret":'NLXuKVy6GG'}
+                        headers_naver_open_api = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36', 
+                                                  "X-Naver-Client-Id":'kGjLkvRUDvR3yo09JJoV', "X-Naver-Client-Secret":'kRm3qyLNTo'}
+                        res_api = requests.get(naver_open_api, headers=headers_naver_open_api)
 
-                    if res_api.status_code != 200:
-                        print('naver_open_api 접속 오류')
-                    else:
-                        print('naver_open_api 접속 완료')
-                        result_dict = json.loads(res_api.text)
-                        try:
-                            Title_searched_key = result_dict['items'][0]['title']
-                            Title_searched_key_trash_words = ['<b>', '</b>']
-                            for Title_searched_key_trash_word in Title_searched_key_trash_words:
-                                Title_searched_key = Title_searched_key.replace(Title_searched_key_trash_word, "")
-                        except:
-                            Title_searched_key = '확인필요'
-                        try:
-                            Lower_price_searched_key = result_dict['items'][0]['lprice']
-                        except:
-                            Lower_price_searched_key = '확인필요'
-                        try:
-                            Lower_mall_searched_key = result_dict['items'][0]['mallName']
-                        except:
-                            Lower_mall_searched_key = Lower_mall_searched_key
-                        try:
-                            Lower_url_searched_key = result_dict['items'][0]['link']
-                        except:
-                            Lower_url_searched_key = '확인필요'
-                            
-                        try: #gate주소가 아닌  naver_catalog 주소 파악
-                            product_id_naver_mall_url_re = re.compile('(?<=id=)[0-9]+')
-                            product_id_naver_mall_url = product_id_naver_mall_url_re.findall(Lower_url_searched_key)[0]
-                            Lower_url_searched_key_temp = 'https://search.shopping.naver.com/catalog/' + str(product_id_naver_mall_url)
-                            res = requests.get(Lower_url_searched_key_temp, timeout=3, headers=headers) 
-                            soup = BeautifulSoup(res.text, 'html.parser')
-                            if '존재하지 않습니다' in str(soup): 
-                                print('Lower_url_searched_key_temp는 gate 주소, mall 직접 연결할 주소 파악 시작')
-                                res = requests.get(Lower_url_searched_key, timeout=3, headers=headers) 
+                        if res_api.status_code != 200:
+                            print('naver_open_api 접속 오류')
+                        else:
+                            print('naver_open_api 접속 완료')
+                            result_dict = json.loads(res_api.text)
+                            try:
+                                Title_searched_key = result_dict['items'][0]['title']
+                                Title_searched_key_trash_words = ['<b>', '</b>']
+                                for Title_searched_key_trash_word in Title_searched_key_trash_words:
+                                    Title_searched_key = Title_searched_key.replace(Title_searched_key_trash_word, "")
+                            except:
+                                Title_searched_key = '확인필요'
+                            try:
+                                Lower_price_searched_key = result_dict['items'][0]['lprice']
+                            except:
+                                Lower_price_searched_key = '확인필요'
+                            try:
+                                Lower_mall_searched_key = result_dict['items'][0]['mallName']
+                            except:
+                                Lower_mall_searched_key = Lower_mall_searched_key
+                            try:
+                                Lower_url_searched_key = result_dict['items'][0]['link']
+                            except:
+                                Lower_url_searched_key = '확인필요'
+
+                            try: #gate주소가 아닌  naver_catalog 주소 파악
+                                product_id_naver_mall_url_re = re.compile('(?<=id=)[0-9]+')
+                                product_id_naver_mall_url = product_id_naver_mall_url_re.findall(Lower_url_searched_key)[0]
+                                Lower_url_searched_key_temp = 'https://search.shopping.naver.com/catalog/' + str(product_id_naver_mall_url)
+                                res = requests.get(Lower_url_searched_key_temp, timeout=3, headers=headers) 
                                 soup = BeautifulSoup(res.text, 'html.parser')
-                                script_text = soup.select_one('script[type="application/json"]').text
-                                dict_result_script_text = json.loads(script_text)
-                                Lower_url_searched_key = dict_result_script_text['props']['pageProps']['product']['productUrl']
-                            else:
+                                if '존재하지 않습니다' in str(soup): 
+                                    print('Lower_url_searched_key_temp는 gate 주소, mall 직접 연결할 주소 파악 시작')
+                                    res = requests.get(Lower_url_searched_key, timeout=3, headers=headers) 
+                                    soup = BeautifulSoup(res.text, 'html.parser')
+                                    script_text = soup.select_one('script[type="application/json"]').text
+                                    dict_result_script_text = json.loads(script_text)
+                                    Lower_url_searched_key = dict_result_script_text['props']['pageProps']['product']['productUrl']
+                                else:
+                                    print('naver_catalog 주소 파악')
+                                    Lower_url_searched_key = Lower_url_searched_key_temp           
+                            except:
                                 print('naver_catalog 주소 파악')
-                                Lower_url_searched_key = Lower_url_searched_key_temp           
-                        except:
-                            print('naver_catalog 주소 파악')
-                            Lower_url_searched_key = Lower_url_searched_key
+                                Lower_url_searched_key = Lower_url_searched_key
+                    except:
+                        Title_searched_key = '검색결과 없음'
+                        Lower_price_searched_key = '검색결과 없음'
+                        Lower_mall_searched_key = '검색결과 없음'
+                        Lower_url_searched_key = '검색결과 없음'
 
             # Lower_price_searched_key 전처리
 
@@ -6071,7 +6077,7 @@ except:
 # cur.execute(sql, all_list_tuple)
 
 # db.commit()
-# print("load complete")
+# print("save complete")
 
 # db.close()
 
@@ -6095,7 +6101,7 @@ for list_one in all_list:
 
 # all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId)
 
-# sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, createdAt, updatedAt, UserId) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), %s)"
+# sql = "INSERT INTO posts (Type, Categhttp://itempage3.auction.co.kr/DetailView.aspx?itemno=C266635064ory_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, createdAt, updatedAt, UserId) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), %s)"
 all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId, createdAt, updatedAt)
 
 sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId, createdAt, updatedAt) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
