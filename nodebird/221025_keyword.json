@@ -1,0 +1,131 @@
+{
+  "Distributor_keyword":{
+    "11st":"11번가", "nbkorea":"뉴발란스", "dabangapp":"다방","ldfluxemall":"롯데면세럭스몰",
+  "flyasiana":"아시아나항공", "aladin":"알라딘", "alba":"알바천국","aboutpet":"어바웃펫", 
+  "yes24":"예스24", "auction":"옥션", "oliveyoung":"올리브영", "work":"워크넷","booking":"부킹닷컴",
+  "wavve":"웨이브", "wemakeprice":"위메프", "youtube":"유튜브","cuchenmall":"쿠첸몰", "trip":"트립닷컴", 
+  "tmon":"티몬","tworld":"T world", "hnsmall":"홈앤쇼핑", "lguplusmobiletv.page":"LG U+모바일tv",
+  "uplus":"LG U+모바일tv", "sivillage":"에스아이빌리지", "ysl":"생로랑", "grip":"그립","albamon":"알바몬",
+ "amoremall":"아모레퍼시픽","imdak":"아임닭","millie":"밀리의서재","market09":"공구마켓",
+  "topten10mall":"탑텐몰", "10000recipe":"만개의레시피","yslbeautykr":"입생로랑뷰티","hanssem":"한샘몰",
+  "elandmall":"이랜드몰","innisfree":"이니스프리", "yanolja":"야놀자","twayair":"티웨이항공", "TVING":"티빙",
+  "trenbe":"트렌비", "tistory":"티스토리","ticketlink":"티켓링크", "thehandsome":"더한섬닷컴",
+  "tabling":"테이블링", "styleshare":"스타일쉐어", "style24":"스타일24", "ssg":"SSG.COM", "ssfshop":"SSF Shop", 
+  "spooncast":"스푼", "sonohotelsresorts":"소노호텔&리조트", "socarroad":"쏘카","shoppinghow":"쇼핑하우",
+  "queenit":"퀸잇", "pulmuone":"풀무원","pet-friends":"펫프렌즈", "nsmall":"NS홈쇼핑", "naver":"네이버",
+  "mustit":"머스트잇","musinsaapp":"무신사", "musinsa":"무신사", "m-emart":"이마트몰", "melon":"멜론",
+  "mangoplate":"망고플레이트",  "lotteimall":"롯데홈쇼핑","lkebay":"지마켓", "lfmall":"LF몰", "koreanair":"대한항공", 
+  "kolonmall":"코오롱몰", "kbland":"KB부동산", "kbchachacha":"KB차차차", "karrotmarket":"당근마켓","joongna":"중고나라",
+  "jobkorea":"잡코리아", "jejuair":"제주항공", "interpark":"인터파크","instagram":"인스타그램", "ikea":"이케아", 
+  "houseapp":"하우스앱", "hotels":"호텔스닷컴","hmall":"현대Hmall", "hfashionmall":"H 패션몰", "halfclub":"하프클럽",
+  "google":"구글", "gmarket":"지마켓", "facebook":"페이스북", "daum":"다음","nate":"네이트", "dailyhotel":"데일리호텔",
+  "coupangplay":"쿠팡플레이", "coupang":"쿠팡","costco":"코스트코", "catchtable":"캐치테이블", "boribori":"보리보리", 
+  "bobaedream":"보배드림","bigo":"비고 라이브","balaan":"발란" ,"amazon":"아마존", "aliexpress":"알리익스프레스", 
+  "29cm":"29CM", "a-bly":"에이블리", "dabang":"다방","Newbalancemynb":"뉴발란스", "sajomall":"사조몰",
+ "dive":"현대카드 DIVE", "heydealer":"헤이딜러", "ohou":"오늘의집", "kream":"크림", "Twitter":"트위터",
+ "toptoon":"탑툰", "taobao":"타오바오", "peterpanz":"피터팬의 좋은방 구하기", "joonggonara":"네이버카페|중고나라",
+ "uniqlo":"유니클로", "brunch": "브런치", "triple": "트리플", "sktmembership": "T멤버십", " kyobobook":"교보문고",
+ "hani": "한겨례", "wconcept": "더블유컨셉", "kurly":"마켓컬리", "ggumim" : "집꾸미기", "seoulstore":"서울스토어",
+ "tketlink":"티켓링크", "hellomarket":"헬로마켓", "hotelscombined": "호텔스컴바인", "fitpetmall":"핏펫몰",
+ "skyscanner":"스카이스캐너", "lotteon":"롯데ON", "danawa":"다나와", "daangn":"당근마켓"
+},
+  "Category_keyword":{
+    "shopping": {
+      "Kor" : ["판매", "세일", "할인", "쇼핑", "환불", "교환", "제품"],
+      "Eng" : ["uniqlo", "display", "11st", "coupang", "musinsa", "a-bly", "zigzag", "brandi", "gmarket", "oliveyoung", "wemakeprice", "idus", "auction", "gsshop", "shopping", "smartstore", "shop", 
+      "hnsmall", "cjonstyle", "brand", "store", "products", "product", "wemakeprice", "tmon", "goods", "aliexpress", "amazon", "ebay", "interpark", "29cm", "hfashionmall", "land", "ikea", "kcar", 
+      "kbchachacha", "lfmall", "nsmall", "sivillage", "ssfshop", "ssg", "gucci", "cartier", "nike", "dabangapp", "wconcept", "thehandsome", "shoplive", "dailyhotel", "nbkorea", "koreanair", "dior", 
+      "lotteimall", "sflex", "louisvuitton", "myrealtrip", "homeplus", "mangoplate", "eat_deals", "mustit", "musinsaapp", "moulian", "balaan", "burberry", "booking", "hotel", "chanel", "pulmuone", 
+      "seoulstore", "sonohotelsresorts", "skyscanner", "stylenoriter", "styleshare", "socar", "amoremall", "agoda", "adidas", "ogqmarket", "productId", "realty", "karrotmarket", "aladin", "flyasiana", 
+      "yanolja", "aboutpet", "hermes", "airbnb", "encar", "goodchoice", "ohou", "ProductView", "innisfree", "elandmall", "imvely", "ysl", "jejuair", "zigbang", "ggumim", "costco", "kolonmall", 
+      "cuchenmall", "queenit", "topten10mall", "trenbe", "trip", "twayair", "tiffany", "fashionplus", "pet-friends", "prada", "fitpetmall", "houseapp", "hiver", "halfclub", "hanssem", "hmall", 
+      "hogangnono", "hotels", "hotelscombined", "boribori", "yes24", "book", "ticketlink", "triple", "yslbeautykr", "shoppinghow", "lotteon", "shoplive", "sauceflex", "sflex", "nike", "grip", "gnun", 
+      "babitalk", "outlet", "fitflop", "kbland", "outlet", "theory", "maje", "iherb", "ssense", "item", "ticket", "mall", "heydealer", "kream", "taobao", "peterpanz", "color", "skin"]
+    },
+    "blog": {
+      "Kor" : ["브런치", "판매", "세일", "할인", "블로그", "티스토리", "벨로그", "깃허브", "포스트", "포스팅", "망고플레이트", "만개의레시피", "사람인", "알바몬", "알바", "잡코리아", "다이브", "커리어리", "위키독스", "나무위키",
+       "위키피디아", "니다", "지식iN", "주식"],
+      "Eng" : ["brunch", "sale", "blog", "tistory", "velog", "github", "post", "10000recipe", "mangoplate", "saramin", "story_articles", "jobs", "karrotmarket", "albamon", "alba", "viral", "jobkorea", 
+      "story", "tworld", "work", "articles", "Article", "catchtable", "tabling", "dive", "careerly", "wikidocs", "namuwiki",  "wikipidia", "item", "journal", "search", "recipe", "kin", "stock"]
+    },
+    "sns": {
+      "Kor" : ["인스타그램", "밴드", "페이스북", "에브리타임", "팔로우", "커뮤니티", "친구", "좋아요", "트위터"],
+      "Eng" : ["instagram", "band", "facebook", "everytime", "twitter"]
+    },
+    "video": {
+        "Kor" : ["유튜브", "틱톡", "넷플릭스", "비고라이브", "아프리카TV", "트위치", "티빙", "쿠팡플레이", "웨이브", "네이버 나우", "씨즌", "영상", "동영상", "비디오", "영화", "드라마", 
+        "무비", "브이로그", "재생", "방송", "조회수", "만회", "채널"],
+        "Eng" : ["youtube", "tiktok", "mycake", "video", "netflix", "afreecatv", "bigo", "player", "bj", "vods", "vod", "twitch", "tving", "coupangplay", "wavve", "now", "laftel", 
+        "seezntv", "lguplusmobiletv", "movie", "drama", "vlog", "watch", "playback", "media", "ytimg", "channel"]
+    },
+    "second": {
+      "Kor" : ["당근마켓", "번개장터", "중고나라", "중고", "헬로마켓", "당근", "중고거래", "팝니다", "판매", "미개봉", "거래", "사용", "직거래", "번개장터", "번장", "마켓", "중고카페", "연예인용품", "스타굿즈", "저렴", "개인간 거래", "중고장터", "알뜰장터", "중고폰", "중고시장", "중고마켓", "벼룩시장", "벼룩장터", "중고상품", "중고아이템", "중고품", "중고물품", "무료 나눔", "물물교환", "프리마켓", "중고쇼핑"],
+      "Eng" : ["daangn", "joonggonara", "joongna", "bunjang", "hellomarket", "danggeunmarket", "product", "item", "Market"]
+    },
+    "cafe": {
+      "Kor" : ["카페"],
+      "Eng" : ["cafe",  "ClubId", "clubid", "cafeid", "cafeId"]
+    },
+    "news": {
+      "Kor" : ["뉴스", "신문", "보도", "일보", "속보", "단독", "언론", "니다"],
+      "Eng" : ["news", "joongang", "yna", "weather", "entertain", "wikipedia", "finance", "article", "journal", "JOURNAL"]
+    },
+    "images": {
+      "Kor" : ["미리보기"],
+      "Eng" : [".img", ".jpg", ".png", ".jpeg", "m_image"]
+    },
+    "enter": {
+      "Kor" : ["오디오북", "뮤직", "음악", "멜론", "스포티파이", "플로", "유튜브뮤직"],
+      "Eng" : ["music", "music-flo", "spooncast", "link-page", "melon","spotify", "welaaa", "audiobook"]
+    },
+    "reading": {
+      "Kor" : ["독서", "밀리의서재", "사전", "도서", "서점", "탑툰", "투믹스", "작가", "만화", "웹툰", "연재", "판타지", "무협", "소설"],
+      "Eng" : ["lezhin", "ridi.", "ridibooks", "manhwakyung", "bomtoon", "webtoon", "book", "millie", "dic", "toptoon", "toomics", "novel", "comic", "ebook"]
+    },
+    "map": {
+      "Kor" : ["카카오맵", "티맵", "지도", "길찾기", "지하철", "거리뷰", "지도앱", "버스", "도보", "자전거", "대중교통", "도착", "내비게이션", "실시간"],
+      "Eng" : ["map", "maps", "tmap", "place", "tip", "content", "item", "display", "direction", "location"]
+    }
+  },
+  "Trash_keyword":{
+    "Title_searched":{
+        "Kor":["중고거래", "미당첨시", "자동환불", "쇼핑", "감도 깊은 취향 셀렉트샵", "깜짝특가", "사은품", "CJ런칭", "단하루", "핫딜", "신상출시", "단독기획", "예쁜템들 모여사는  스토어", "오늘 하루만"],
+        "Eng":["upto50", "&apos;"]
+    },
+    "Title":{
+        "Kor":["제네럴갓킹펜유"],
+        "Eng":["<br>", "\u200e", "amp;", "\r\n\t\t\t"] 
+      },
+    "Destributor":{
+        "Kor":["ㄴ "],
+        "Eng":["\t", "\n", "\r\n", "\ufeff", "\u200e", "\r\u200b\r", "\r", "<ul>", "</ul>", "<li>", "</li>"]
+    }
+  },
+  "Condition_keyword":{
+    "no_Lower_price_keywords":{
+        "Kor":["제네럴갓킹펜유"],
+        "Eng":["myrealtrip", "town.daangn", "goodchoice", "airbnb", "booking.com", "asiana", "exhib", "hotels.", "yanolja", "chkin", "checkin", "check-in", "hotels\/", "agoda", "spooncast", "ticketlink",
+        "ticket", "Perf","ExpectationList", "trip.com", "kkday", "catchtable", "kbland"] 
+    },
+    "no_Lower_price_searched_keywords":{
+        "Kor":["확인불가", "확인필요"],
+        "Eng":["car.", "land.", "dabang", "myrealtrip", "mangoplate", "karrotmarket", "town.daangn", "ogqmarket", "goodchoice", "zigbang", "ticket", "yanolja", "chkin", "checkin", "check-in", "hotels\/", 
+        "chachacha", "agoda", "hogangnono", "peterpanz"]
+      },
+    "money_exchange_keywords":{
+        "Kor":["제네럴갓킹펜유"],
+        "Eng":["amazon","ebay.com", "ssense", "theory"] 
+    },
+    "no_unit_change_keywords":{
+        "Kor":["제네럴갓킹펜유"],
+        "Eng":["myrealtrip", "town.daangn", "goodchoice", "airbnb", "booking.com", "asiana", "exhib",
+        "car.", "land.", "dabang", "zigbang", "myrealtrip", "mangoplate", "karrotmarket", 
+       "town.daangn", "goodchoice", "encar","hogangnono", "spooncast", "kbland", "peterpanz"] 
+        },
+    "Thumbnail_image_extention_list":{
+        "Kor":["제네럴갓킹펜유"],
+        "Eng":[".img", "img.", ".IMG", "IMG.", "thumb", "placeweb", "image", "download", ".png", ".PNG", 
+        ".jpg", ".JPG", ".gif", ".GIF", ".jpeg", ".JPEG", "LARGE", "large"]
+        }
+  }
+}
