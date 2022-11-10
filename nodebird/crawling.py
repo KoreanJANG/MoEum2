@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[7]:
+# In[1]:
 
 
-'''221025 ver1.26 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
+'''221110 ver1.29 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
 
-              수정) 1. 토니 수정 반영
-              2. Title_key_i 중 '[디스트리뷰터]'만 남았을 경우 삭제\
-              3. 네이버 주식 당일 시가를  Title_key에 포함
-
+              수정) 1. db 디폴트/크롤링 2중 저장
+              2. 기타 코드 수정
+              3. 오류 문구 수정
+              4. db - 테마, 메모 컬럼 추가
                      '''
 
 import requests
@@ -32,7 +32,7 @@ import datetime
 from collections import Counter, OrderedDict
 import random 
 
-# # data - mysql DB 접속 #라니 오픈
+# data - mysql DB 접속 #라니 오픈
 try:
     db = pymysql.connect(host="moum3.cjk00gposwcb.ap-northeast-2.rds.amazonaws.com", user='admin', password='fnucni1234!', db='moum', charset='utf8mb4')
     cur = db.cursor()
@@ -83,23 +83,141 @@ Lower_mall_searched = []
 Lower_url_searched = []
 
 
-# 라니 오픈
-# https://wikidocs.net/16049 참고
-# 파이썬 실행시 파라미터로 url 받도록 수정
+# # 라니 오픈
+# # https://wikidocs.net/16049 참고
+# # 파이썬 실행시 파라미터로 url 받도록 수정
 User_url = sys.argv[1]
-# # 파이썬 실행시 파라미터로 user id 받도록 수정
 UserId = sys.argv[2]
+Mymemo = sys.argv[3]
+MyThema = sys.argv[4]
+# Mymemo = ['Temp.memo']
+# MyThema = ['Temp.Thema']
+
 
 start = time.time()  # 시작 시간 저장
 
 # # 제이 오픈, 라니 클로즈
-# # UserId = "test"
-# User_url = input('')
+# UserId = None
+# User_url = input("???")
 
-# 디폴트값 설정  #경로값 수정해야 함(서버 내 썸네일 파일 저장 필요)
+#Title_key
+try:
+    Title_key_default_re = re.compile('(?<=\/\/)(.*?)(?=\/)')
+    Title_key = Title_key_default_re.findall(User_url)[0]
+except:
+    Title_key = User_url
+Title.append(Title_key)    
 
+#Thumbnail_image
 Thumbnail_image_key = 'https://lh3.googleusercontent.com/drive-viewer/AJc5JmQtu9w8WEBCv2de0MiHFyUdDp8Lk9sGAkHTl_b0d0bMbJzfU0wriDr9WGWLNE_hcoR8-USSsvA=w1920-h902' #라니(서버)
 Thumbnail_image.append(Thumbnail_image_key)
+
+#Distributor
+try:
+    User_url_domain_re = re.compile('https?://([A-Za-z_0-9.-]+).*')
+    User_url_domain = User_url_domain_re.findall(User_url)[0]
+    User_url_domain_list = re.split('\.|/|\?|&|=', User_url_domain)
+
+    User_url_delete_keywords = ['guide', 'app', 'show', 'https:', 'or', 'www', 'co', 'kr', 'onelink','page','link', 'www', 
+                                'se','io','in', 'tv','subium','go','net','me','m','com','store', 'place','map','brand', 'team',
+                               'toastoven', 'dn', 'au', 'org']
+    User_url_domain_list = list((Counter(User_url_domain_list) - Counter(User_url_delete_keywords)).elements())
+    Distributor_key = User_url_domain_list[-1]
+except:
+    Distributor_key = "해당 링크에서 직접 보기"
+Distributor.append(Distributor_key)
+
+#Category_in
+# Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
+#제이 경로
+# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+#     keyword_data = json.load(json_file)
+#토니 경로
+# with open('C:/Users\FNUCNI\Desktop\python/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+#     keyword_data = json.load(json_file)
+# #라니 경로
+with open('/home/ec2-user/MoEum2/nodebird/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+    keyword_data = json.load(json_file)
+
+Category_keyword_list = ['shopping', 'blog', 'sns', 'video', 'second', 'cafe', 'news', 'images', 'enter', 'reading', 'map']
+for Category_keyword_keyword in Category_keyword_list:
+    globals()["Category_in_keyword_list_{}".format(Category_keyword_keyword)] = keyword_data['Category_keyword'][Category_keyword_keyword]['Kor'] + keyword_data['Category_keyword'][Category_keyword_keyword]['Eng']
+
+Category_in_keyword_list_all = [Category_in_keyword_list_cafe, Category_in_keyword_list_news, 
+                                Category_in_keyword_list_shopping, Category_in_keyword_list_blog, Category_in_keyword_list_sns, 
+                                Category_in_keyword_list_video, Category_in_keyword_list_second, Category_in_keyword_list_images,
+                                Category_in_keyword_list_enter, Category_in_keyword_list_map, Category_in_keyword_list_reading]
+
+Category_in_keyword_dict = {'image' : Category_in_keyword_list_images, 'news' : Category_in_keyword_list_news, 
+                            'cafe' : Category_in_keyword_list_cafe, 'second' : Category_in_keyword_list_second, 
+                            'blog' : Category_in_keyword_list_blog, 'shopping' : Category_in_keyword_list_shopping, 
+                            'sns' : Category_in_keyword_list_sns, 'video' : Category_in_keyword_list_video,
+                            'enter' : Category_in_keyword_list_enter, 'map' : Category_in_keyword_list_map,
+                           'reading' : Category_in_keyword_list_reading}
+
+#참고: Category_in_keyword_dict 의 vlaues 값 중복 시 마지막 하나만 표현(dict 고유의 성격), 따라서 key값이 마지막것으로 표현됨
+
+Category_in_keyword_match_list_cnt_dict = dict()
+User_url_list = re.split('\.|/|\?|&|=', User_url)
+
+for Category_in_keyword_list_all_i in Category_in_keyword_list_all:
+    Category_in_keyword_match_list = list(set(User_url_list).intersection(Category_in_keyword_list_all_i))
+    Category_in_keyword_match_list_cnt = len(Category_in_keyword_match_list)
+    Category_in_keyword_match_list_cnt_dict[Category_in_keyword_match_list_cnt] = Category_in_keyword_list_all_i
+if max(Category_in_keyword_match_list_cnt_dict.keys()) == 0:
+    Category_in_key = "해당 링크에서 직접 보기"
+else:
+    Category_in_keyword_match_list_cnt_dict_keys_max_values = Category_in_keyword_match_list_cnt_dict[max(Category_in_keyword_match_list_cnt_dict.keys())]
+
+    for key, value in Category_in_keyword_dict.items():
+        if value == Category_in_keyword_match_list_cnt_dict_keys_max_values:
+            Category_in_key = key
+Category_in.append(Category_in_key)
+
+#Type
+
+if Category_in_key in ['news', 'cafe', 'blog', 'sns']:
+    Type_key = "글"
+
+elif Category_in_key in ['shopping', 'second']:
+    Type_key = "위시"
+
+elif Category_in_key in ['video', 'enter', 'reading']:
+    Type_key = "동영상" 
+
+# elif Category_in_key in ['sns', 'image']:
+#     Type_key = "이미지"
+
+#     # jpg 등 이미지 확장자가 url에 포함된 경우 이를 이미지로 분류
+# elif any(Category_in_keyword_list_image in User_url for Category_in_keyword_list_image in Category_in_keyword_list_images) == True:
+#     Type_key = "이미지"
+
+elif Category_in_key in ['map']:
+    Type_key = "지도"
+    
+else:
+    Type_key = "기타" #enter를 일단 기타로. image = 기타
+
+Type.append(Type_key)
+
+# default db input
+
+# all_list = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
+all_list = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
+
+for list_one in all_list:
+    if len(list_one) == 0:
+        list_one.append("no_data")
+
+# all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched)
+all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema)
+
+sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+
+cur.execute(sql, all_list_tuple)
+db.commit()
+print('Title_key: ', Title_key, " / Distributor_key: ", Distributor_key, " / Category_in_key: ", Category_in_key, " / Type_key: ", Type_key)
+print("default db commit 완료")
 
 #설명 1번
 
@@ -256,13 +374,13 @@ print("User_url_list_Distributor는 ", User_url_list_Distributor)
 # 설명 2번
 # Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
 #제이 경로
-# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221025_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 #토니 경로
-# with open('C:/Users\FNUCNI\Desktop\python/221025_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+# with open('C:/Users\FNUCNI\Desktop\python/21109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 # #라니 경로
-with open('/home/ec2-user/MoEum2/nodebird/221025_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+with open('/home/ec2-user/MoEum2/nodebird/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
     keyword_data = json.load(json_file)
 
 # url - Distributor_keyword list match
@@ -287,7 +405,7 @@ try:
 
     User_url_delete_keywords = ['guide', 'app', 'show', 'https:', '', 'www', 'co', 'kr', 'onelink','page','link', 'www', 
                                 'se','io','in', 'tv','subium','go','net','me','m','com','store', 'place','map','brand', 'team',
-                               'toastoven', 'dn']
+                               'toastoven', 'dn', 'au']
     User_url_domain_list = list((Counter(User_url_domain_list) - Counter(User_url_delete_keywords)).elements())
     Distributor_key = User_url_domain_list[-1]
 except:
@@ -452,6 +570,22 @@ except:
         for key, value in Category_in_keyword_dict.items():
             if value == Category_in_keyword_match_list_cnt_dict_keys_max_values:
                 Category_in_key = key
+                
+#Category_in_key 검사                
+if Category_in_key == 'map':
+    Category_in_keyword_list_map_match_list = list(set(User_url_list).intersection(Category_in_keyword_list_map))
+    Category_in_keyword_list_map_match_list_cnt = len(Category_in_keyword_list_map_match_list)
+    if Category_in_keyword_list_map_match_list_cnt > 0:
+        pass
+    else:
+        print("Category_in_keyword 탐색 재시도(not map)")
+        Category_in_keyword_count_dict_value_list = list(Category_in_keyword_count_dict.values())
+        Category_in_keyword_count_dict_value_list.sort()
+        Category_in_keyword_count_dict_value_second_count = Category_in_keyword_count_dict_value_list[-2]
+
+
+        Category_in_keyword_count_dict_reversed= dict(map(reversed, Category_in_keyword_count_dict.items()))
+        Category_in_key = Category_in_keyword_count_dict_reversed[Category_in_keyword_count_dict_value_second_count]
 
 Category_in.append(Category_in_key)
   
@@ -511,29 +645,39 @@ else:
     print("Distributor_key값은? ", Distributor_key)
 
 # 설명 4번
+
 # Type 파악
+try:
+    count_all_shopping_second = Category_in_keyword_shopping_count + Category_in_keyword_second_count
+    count_all_blog_sns_cafe_news = Category_in_keyword_blog_count + Category_in_keyword_sns_count + Category_in_keyword_cafe_count + Category_in_keyword_news_count
+    count_all_video_enter_reading = Category_in_keyword_video_count + Category_in_keyword_enter_count + Category_in_keyword_reading_count
 
-if Category_in_key in ['news', 'cafe', 'blog','reading', 'sns']:
-    Type_key = "글"
+    count_all = [count_all_shopping_second, count_all_blog_sns_cafe_news, count_all_video_enter_reading, Category_in_keyword_map_count]
 
-elif Category_in_key in ['shopping', 'second']:
-    Type_key = "위시"
+    if max(count_all) == 0:
+        Type_key = "기타"
+    elif max(count_all) == count_all_blog_sns_cafe_news:
+        Type_key = '글'
+    elif max(count_all) == count_all_shopping_second:
+        Type_key = '위시'
+    elif max(count_all) == count_all_video_enter_reading:
+        Type_key = '동영상'   
 
-elif Category_in_key in ['video']:
-    Type_key = "동영상"
+    # elif Category_in_key in ['sns', 'image']:
+    #     Type_key = "이미지"
 
-# elif Category_in_key in ['sns', 'image']:
-#     Type_key = "이미지"
+    #     # jpg 등 이미지 확장자가 url에 포함된 경우 이를 이미지로 분류
+    # elif any(Category_in_keyword_list_image in User_url for Category_in_keyword_list_image in Category_in_keyword_list_images) == True:
+    #     Type_key = "이미지"
 
-#     # jpg 등 이미지 확장자가 url에 포함된 경우 이를 이미지로 분류
-# elif any(Category_in_keyword_list_image in User_url for Category_in_keyword_list_image in Category_in_keyword_list_images) == True:
-#     Type_key = "이미지"
+    elif Category_in_key in ['map'] or max(count_all) == Category_in_keyword_map_count:
+        Type_key = "지도"
 
-elif Category_in_key in ['map']:
-    Type_key = "지도"
-    
-else:
-    Type_key = "기타" #enter를 일단 기타로. image = 기타
+    else:
+        Type_key = "기타" #enter를 일단 기타로. image = 기타
+except:
+    print("category_count 파악 불가")
+    Type_key = "기타"
 
 Type.append(Type_key)
 print("Type 리스트 값은 ", Type)
@@ -1132,6 +1276,10 @@ try:
                 Thumbnail_image_key = dict_result_script_api['images'][0]['url']
             except:
                 Thumbnail_image_key = Thumbnail_image_key
+        try:
+            Title_key = Title_key + str(" ,") + Description_key
+        except:
+            pass 
                 
     elif 'stock.naver' in User_url:
         product_id_re = re.compile('(?<=stock\/)[0-9]+')
@@ -1515,12 +1663,13 @@ try:
         Title_key = Description_key
         Description_key = Title_key_temp       
 
-       
-        
-        
     elif 'kcar' in User_url:
-        product_id_kcar_re = re.compile('(?<=CarCd=)(.+)[(?=\&)]?')
-        product_id_kcar = product_id_kcar_re.findall(User_url)[0]
+        try:
+            product_id_kcar_re = re.compile('(?<=CarCd=)\w+')
+            product_id_kcar = product_id_kcar_re.findall(User_url)[0]
+        except:
+            product_id_kcar_re = re.compile('(?<=CarCd=)(.+)[(?=\&)]?')
+            product_id_kcar = product_id_kcar_re.findall(User_url)[0]
 
         User_url_api = 'https://mapi.kcar.com/bc/car-info-detail?i_sCarCd=' + str(product_id_kcar)
 
@@ -2889,7 +3038,13 @@ try:
                 Thumbnail_image_key = dict_result_script_text['thumbnailUrl']
             except:
                 Thumbnail_image_key = Thumbnail_image_key
-
+                
+    elif 'map.kakao' in User_url:
+        try:
+            Title_key = Title_key + str(" ,") + Description_key
+        except:
+            pass
+        
     elif 'twayair' in User_url:
         try: 
              Title_key = soup.select_one('#content > div.section.t3 > div > div.grid_view_head.evt > h3').text
@@ -3602,8 +3757,9 @@ try:
                 pass
 
     elif 'kbland' in User_url: 
-        kbland_id_re = re.compile('(?<=c\/)\d+')
+        kbland_id_re = re.compile('(?<=c\/|p\/)\d+')
         kbland_id = kbland_id_re.findall(User_url)[0]
+        
         kbland_type_re = re.compile('(?<=ctype=)\d+')
         kbland_type = kbland_type_re.findall(User_url)[0]
         try:
@@ -3612,7 +3768,13 @@ try:
             result_dict = json.loads(res_api.text)
             Title_key = result_dict['dataBody']['data']['단지명']
         except:
-            Title_key = Title_key
+            try:
+                User_url_api = 'https://api.kbland.kr/land-property/property/bascInfo?%EB%A7%A4%EB%AC%BC%EC%9D%BC%EB%A0%A8%EB%B2%88%ED%98%B8='+kbland_id+'&%EB%A7%A4%EB%AC%BC%EB%85%B8%EC%B6%9C%EC%9A%94%EC%B2%AD=Y'
+                res_api = requests.get(User_url_api, timeout=3, headers = headers) 
+                result_dict = json.loads(res_api.text)
+                Title_key = result_dict['dataBody']['data']['bascInfo']['매물명']                
+            except:    
+                Title_key = Title_key
             
         try:
             pic_url_api = 'https://api.kbland.kr/land-complex/complex/phtoList?%EB%8B%A8%EC%A7%80%EA%B8%B0%EB%B3%B8%EC%9D%BC%EB%A0%A8%EB%B2%88%ED%98%B8='+kbland_id
@@ -3620,7 +3782,7 @@ try:
             pic_result_dict = json.loads(pic_res_api.text)
             Thumbnail_image_key = pic_result_dict['dataBody']['data'][0]['전체이미지경로_1920']
         except:
-            Thumbnail_image_key = Thumbnail_image_key           
+            Thumbnail_image_key = Thumbnail_image_key       
 
     elif 'gap.com'in User_url: 
         try:                    
@@ -3642,6 +3804,27 @@ try:
         except:
             Title_key = Title_key
             
+    elif 'sooldamhwa'in User_url:    
+        script_text = soup.select_one('script[type="application/json"]').text
+        dict_result = json.loads(script_text)
+        try:
+            Title_key = dict_result['props']['pageProps']['metaTags']['title']
+        except:
+            try:
+                Title_key = dict_result['props']['pageProps']['initialState']['damhwaMarket']['product']['name']
+            except:
+                Title_key = Title_key
+        try:
+            Description_key = dict_result['props']['pageProps']['initialState']['damhwaMarket']['product']['damhwaNote']
+        except:
+            try:
+                Description_key = dict_result['props']['pageProps']['metaTags']['description']
+            except:
+                try:
+                    Description_key = dict_result['props']['pageProps']['initialState']['damhwaMarket']['product']['subText']
+                except:
+                    Description_key = Description_key
+                
 #3요소소
             
 ##코리아센터 (메이크샵)공통 -------------------------------------------------------------------------
@@ -3809,11 +3992,14 @@ if Type_key == '동영상':
             except:
                 Duration_key = "해당 링크에서 직접 보기"
     else:
-        Duration_key = "해당 링크에서 직접 보기"
-        
+        pass
+
+try:
     Duration.append(Duration_key)
-    print("Duration 리스트 값은, ", Duration)    
-    
+    print("Duration 리스트 값은, ", Duration) 
+except:
+    pass
+   
 # Title_key 자체의 Trash_keyword 제거
 try:
     font_trash_word_re = re.compile('\<font.*?\>')
@@ -3830,11 +4016,14 @@ for Title_key_trash_word in Title_key_trash_words:
 #Title_key 디폴트 값
 
 if Title_key == '해당 링크에서 직접 보기' or 'denied' in Title_key or 'Denied' in Title_key:
-    Title_key_default_re = re.compile('(?<=\/\/)(.*?)(?=\/)')
-    Title_key_default = Title_key_default_re.findall(User_url)[0]
-    # .replace('https', '').replace('http', '').replace('m.', '').replace('www', '').replace(':', '').replace('kr.', '').strip(' /.')
+    try:
+        Title_key_default_re = re.compile('(?<=\/\/)(.*?)(?=\/)')
+        Title_key_default = Title_key_default_re.findall(User_url)[0]
+        # .replace('https', '').replace('http', '').replace('m.', '').replace('www', '').replace(':', '').replace('kr.', '').strip(' /.')
 
-    Title_key = Title_key_default
+        Title_key = Title_key_default
+    except:
+        Title_key = User_url
 Title.append(Title_key.strip())    
 
 # Desc. trash_word 제거
@@ -3883,7 +4072,7 @@ print("최종 User_url", User_url)
 
 #1. Lower_price, Searched까지 다 찾는 것(Ex. 11번가 - 구체적 상품 페이지): Type == 위시 구분된 것
 #2. Lower_price만 찾고 Searched는 안 찾는 것(Ex. 부동산, 자동차, 숙박, 항공, 공연티켓, 여행상품): no searched 셋팅 / Lower_price_key 안 잡는 경우: 룸/상품 등 조건이 많은 경우
-#3. Lower_price, Searched 다 안 찾는 것(Ex. 11번가 - 기획전 페이지): Lower_price == "확인필요" or "-" 
+#3. Lower_price, Searched 다 안 찾는 것(Ex. 11번가 - 기획전 페이지): Lower_price == "비교가를 찾을 수 없어요" or "-" 
 
 if Type_key == '위시':
     print("현재 가격 스크래핑 시작")
@@ -4245,29 +4434,16 @@ if Type_key == '위시':
 
             elif 'kcar.' in User_url:  
                 try:
-                    Lower_price_org = soup.select_one('input#sell_price')['value']
-                except:
-                    try:
-                        Lower_price_org = soup.select_one('div.car_price_info span').text
-                    except:
-                        try:
-                            Lower_price_org = dict_result_script_api['data']['rvo']['wklyDcPrc']
+                    Lower_price_org = dict_result_script_api['data']['rvo']['wklyDcPrc']                           
+                    if Lower_price_org is None :
+                        Lower_price_key = dict_result_script_api['data']['rvo']['salprc']
+                    else: 
+                        Lower_price_key = Lower_price_org
+                        
+                    Lower_price_key = f"{int(Lower_price_key):,}만원"
                             
-                        except:
-                            try:
-                                Lower_price_org = dict_result_script_api['data']['rvo']['salprc']
-                            except:
-                                try:
-                                    Lower_price_org = dict_result_script_api['data']['rvo']['npriceFullType']
-                                except:
-                                    try:
-                                        Lower_price_org = dict_result_script_api['data']['rvo']['npriceFullType']
-                                    except:
-                                        Lower_price_org = Lower_price_key
-                if len(Lower_price_org) < 6:
-                    Lower_price_key = str(Lower_price_org)+"만원"
-                else:
-                    Lower_price_key = Lower_price_org
+                except:
+                    Lower_price_key = Lower_price_key
                 
             elif 'kream' in User_url:
                 try:
@@ -4278,10 +4454,10 @@ if Type_key == '위시':
 
             elif 'kbchachacha' in User_url:  
                 try:
-                    Lower_price_key = soup.select_one('strong.cost-highlight').text
+                    Lower_price_key = soup.select_one('strong.cost-highlight').text.strip()
                 except:
                     try:
-                        Lower_price_key = soup.select_one('div.car-intro__cost.ui-inview').text
+                        Lower_price_key = soup.select_one('div.car-intro__cost.ui-inview').text.strip()
                     except:
                         Lower_price_key = Lower_price_key
 
@@ -4452,17 +4628,20 @@ if Type_key == '위시':
                                             Lower_price_key = str(dict_result_script_text['state']['article']['price']['warrantPrice'])
                                         except:
                                             Lower_price_key = Lower_price_key   
+                                            
+                    roomtype_naver = dict_result_script_text['state']['article']['article']['tradeTypeName']
                     # 가격 단위 수정
-                    Lower_price_key_last = Lower_price_key[-1]
-
-                    try:
-                        Lower_price_key_last =  int(Lower_price_key_last)
-                        Lower_price_key = str(Lower_price_key) + '만원'
-                    except:
+                  #  Lower_price_key_last = Lower_price_key[-1]
+                    if 'complex' in User_url:
                         try:
-                            Lower_price_key = str(Lower_price_key) + '원'
+                            Lower_price_key = str(Lower_price_key) 
                         except:
-                            Lower_price_key = Lower_price_key
+                            Lower_price_key = Lower_price_key  
+                    else:        
+                        try:
+                            Lower_price_key = roomtype_naver + ' ' + str(Lower_price_key) 
+                        except:
+                            Lower_price_key = Lower_price_key   
                             
                 elif 'book' in User_url:
                     try:
@@ -4769,19 +4948,25 @@ if Type_key == '위시':
                     Lower_price_key = script_re.findall(str(soup))[0].strip('"')  
 
             elif 'encar' in User_url:
-
-                product_id_encar_re = re.compile('(?<=carid=).+')
-                product_id_encar = product_id_encar_re.findall(User_url)[0]
-        
-                User_url_api = 'http://www.encar.com/dc/dc_cardetailview.do?method=ajaxInspectView&rgsid=' + str(product_id_encar)+ '&sdFlag=N'
-                res_api = requests.get(User_url_api, timeout=3, headers = headers) 
-             
-                result_dict = json.loads(res_api.text)
                 try:
+                    product_id_encar_re = re.compile('(?<=carid=).+')
+                    product_id_encar = product_id_encar_re.findall(User_url)[0]
+        
+                    User_url_api = 'http://www.encar.com/dc/dc_cardetailview.do?method=ajaxInspectView&rgsid=' + str(product_id_encar)+ '&sdFlag=N'
+                    res_api = requests.get(User_url_api, timeout=3, headers = headers) 
+             
+                    result_dict = json.loads(res_api.text)
+                
                     Lower_price_key1 = result_dict[0]['inspect']['carSaleDto']['price']
-                    Lower_price_key = f'{Lower_price_key1:,}' + '만'
+                    Lower_price_key = f'{Lower_price_key1:,}' + '만원'
                 except:
-                    Lower_price_key = Lower_price_key 
+                    try:
+                        script_re = re.compile('(?<=price\":)\d+')
+                        Lower_price_key1 = script_re.findall(str(soup))[0]
+                        Lower_price_key = f'{int(Lower_price_key1):,}' + '만원'
+
+                    except:
+                        Lower_price_key = Lower_price_key 
                         
             elif 'yes24' in User_url:
                 try:
@@ -5183,11 +5368,6 @@ if Type_key == '위시':
                 try:
                     script_text = soup.select_one('script[type="application/json"]').text
                     dict_script_text = json.loads(eval(script_text))
-
-                    area_type_org = dict_script_text['AptStore']['detail']['currentArea']['public_area']
-
-                    area_type_cal = round(round(area_type_org) // 3.3058)
-                    area_type = str(area_type_cal)+'평'
                                
                     Lower_price_sell = dict_script_text['AptStore']['detail']['currentArea']['real_trade_price']
                     Lower_price_rent = dict_script_text['AptStore']['detail']['currentArea']['real_rent_price']    
@@ -5205,11 +5385,11 @@ if Type_key == '위시':
                             Lower_price_key1 = f"{int(Lower_price_be // 10000):,}억"
                             Lower_price_key2 = Lower_price_be % 10000
                             if Lower_price_key2 > 0:
-                                Lower_price_key_re = Lower_price_key1 + f" {int(Lower_price_key2)}만"
+                                Lower_price_key_re = Lower_price_key1 + str(Lower_price_key2)
                             else:
                                  Lower_price_key_re = Lower_price_key1
                         elif Lower_price_be >= 1: # 1만 이상
-                            Lower_price_key_re = f" {int(Lower_price_be)}만"                    
+                            Lower_price_key_re = str(Lower_price_be)                    
 
                         Lower_price_list_cal.append(Lower_price_key_re)
 
@@ -5219,9 +5399,9 @@ if Type_key == '위시':
                     itemlist_hogang = id_hogang.split('/')
                     print(itemlist_hogang)
                     if itemlist_hogang[1] == '0':
-                        Lower_price_key = '매매' + ' ' + area_type + ' ' + Lower_price_list_cal[0] + '원'
+                        Lower_price_key = '매매' + ' ' + Lower_price_list_cal[0] 
                     else:
-                        Lower_price_key = '전월세' + ' ' + area_type + ' ' + Lower_price_list_cal[1] + '원'
+                        Lower_price_key = '전월세' + ' '+ Lower_price_list_cal[1]
             
                 except:
                     Lower_price_key = "해당 링크에서 직접 보기"
@@ -5297,11 +5477,11 @@ if Type_key == '위시':
                         Lower_price_key1 = f"{int(Lower_price_be // 10000):,}억"
                         Lower_price_key2 = Lower_price_be % 10000
                         if Lower_price_key2 > 0:
-                            Lower_price_key_re = Lower_price_key1 + f" {int(Lower_price_key2)}만"
+                            Lower_price_key_re = Lower_price_key1 + str(Lower_price_key2)
                         else:
                              Lower_price_key_re = Lower_price_key1
                     elif Lower_price_be >= 1: # 1만 이상
-                        Lower_price_key_re = f" {int(Lower_price_be)}만"
+                        Lower_price_key_re = str(Lower_price_be)
                 
     
                     Lower_price_list_re.append(Lower_price_key_re)
@@ -5311,24 +5491,18 @@ if Type_key == '위시':
                 try:   
                     if 'apt' in User_url:
                         if dict_result_script_text['props']['pageProps']['SSRData']['danjis']['분양세대수'] == None :
-                            Lower_price_key = '매매' + ' ' + Lower_price_dict['최소']+ '원~' +  Lower_price_dict['최대']+'원'
+                            Lower_price_key = '매매' + ' ' + Lower_price_dict['최소']+ '~' +  Lower_price_dict['최대']
                         else:
-                            Lower_price_key = '분양가' + ' ' +  Lower_price_dict['최소']+ '원~' +  Lower_price_dict['최대']+'원'
+                            Lower_price_key = '분양가' + ' ' +  Lower_price_dict['최소']+ '~' +  Lower_price_dict['최대']
                     elif (result_dict['item']['sales_type']) == '월세' or (result_dict['item']['sales_type']) == '임대':
                         if 'store' in User_url: 
-                            Lower_price_key = '월세' + ' ' +  Lower_price_dict['보증금'] + "/" +  Lower_price_dict['임대비']+'원' + '(관리비포함)'
+                            Lower_price_key = '월세' + ' ' +  Lower_price_dict['보증금'] + "/" +  Lower_price_dict['임대비'] + '(관리비포함)'
                         else:
-                            Lower_price_key = '월세'+ ' ' +Lower_price_dict['보증금'] + "/" +  Lower_price_dict['월세']+'원'
+                            Lower_price_key = '월세'+ ' ' +Lower_price_dict['보증금'] + "/" +  Lower_price_dict['월세']
                     else:
-                        Lower_price_key = result_dict['item']['sales_type']+ ' ' +  Lower_price_dict['매매'] +  Lower_price_dict['보증금']+'원'   
+                        Lower_price_key = result_dict['item']['sales_type']+ ' ' +  Lower_price_dict['매매'] +  Lower_price_dict['보증금']  
                 except:
                     Lower_price_key = Lower_price_key 
-                    
-            elif 'topten10mall' in User_url:
-                try:
-                    Lower_price_key = soup.select_one('meta[property="eg:salePrice"]')['content']
-                except:
-                    Lower_price_key = Lower_price_key  
                     
             elif 'innisfree' in User_url:
                 try:
@@ -5444,20 +5618,37 @@ if Type_key == '위시':
                             except:
                                 Lower_price_key = Lower_price_key
                 else:
-                    Lower_price_key = '확인불가'       
+                    Lower_price_key = Lower_price_key        
 
             elif'dabang' in User_url: 
-                product_id_dabang_re = re.compile('(?<=room\/).+')
-                product_id_dabang = product_id_dabang_re.findall(User_url)[0]
-                User_url_api = 'https://www.dabangapp.com/api/3/room/detail3?api_version=3.0.1&call_type=web&room_id=' + product_id_dabang
-                
-                res_api = requests.get(User_url_api, timeout=3, headers = headers) 
+                if 'sign'in User_url:
+                    product_id_dabang_re = re.compile('(?<=sign\/).+')
+                    product_id_dabang = product_id_dabang_re.findall(User_url)[0]
+                    User_url_api = 'https://www.dabangapp.com/api/3/sign-room/detail?api_version=&call_type=&room_id=' + product_id_dabang
 
-                result_dict = json.loads(res_api.text)
-                try:
-                    Lower_price_key = result_dict['room']['price_title'] + '만원'
-                except:
-                    Lower_price_key = Lower_price_key
+                    res_api = requests.get(User_url_api, timeout=3, headers = headers) 
+
+                    result_dict = json.loads(res_api.text)
+                    try:
+                        Lower_price_key = result_dict['room']['selling_type_str'] + ' ' + result_dict['room']['price_str'] 
+                    except:
+                        Lower_price_key = Lower_price_key
+                 
+                else:    
+                    roomtype_list = ['월세','전세','매매']
+                    roomtype = [rt for rt in roomtype_list if rt in Title_key] 
+
+                    product_id_dabang_re = re.compile('(?<=room\/).+')
+                    product_id_dabang = product_id_dabang_re.findall(User_url)[0]
+                    User_url_api = 'https://www.dabangapp.com/api/3/room/detail3?api_version=&call_type=&room_id=' + product_id_dabang
+
+                    res_api = requests.get(User_url_api, timeout=3, headers = headers) 
+
+                    result_dict = json.loads(res_api.text)
+                    try:
+                        Lower_price_key = roomtype[0] + ' ' + result_dict['room']['price_title'] 
+                    except:
+                        Lower_price_key = Lower_price_key
                     
             elif 'spooncast' in User_url:
                 try:
@@ -5512,8 +5703,8 @@ if Type_key == '위시':
                 price_result_dict = json.loads(price_res_api.text)
     
                 price_type_key  = price_result_dict['dataBody']['data']['bascInfo']['매물거래명']
-                area_type_key_org = price_result_dict['dataBody']['data']['bascInfo']['전용면적']
-                area_type_key = area_type_key_org[:-3]
+#                 area_type_key_org = price_result_dict['dataBody']['data']['bascInfo']['전용면적']
+#                 area_type_key = area_type_key_org[:-3]
                 try:
                     Lower_price_sell = price_result_dict['dataBody']['data']['bascInfo']['매매가']
                     if Lower_price_sell == None:
@@ -5552,11 +5743,11 @@ if Type_key == '위시':
                         Lower_price_key1 = f"{int(Lower_price_be // 10000):,}억"
                         Lower_price_key2 = Lower_price_be % 10000
                         if Lower_price_key2 > 0:
-                            Lower_price_key_re = Lower_price_key1 + f" {int(Lower_price_key2)}만"
+                            Lower_price_key_re = Lower_price_key1 + str(Lower_price_key2)
                         else:
                              Lower_price_key_re = Lower_price_key1
                     elif Lower_price_be >= 1: # 1만 이상
-                        Lower_price_key_re = f" {int(Lower_price_be)}만"
+                        Lower_price_key_re = str(Lower_price_be)
                 
     
                     Lower_price_list_re.append(Lower_price_key_re)
@@ -5565,9 +5756,9 @@ if Type_key == '위시':
                
                 try:   
                     if price_type_key == '월세':
-                        Lower_price_key = price_type_key + ' 전용' + area_type_key + 'm²'+ Lower_price_dict['보증금'] + "/" +  Lower_price_dict['월세']+'원'
+                        Lower_price_key = price_type_key + ' ' + Lower_price_dict['보증금'] + "/" +  Lower_price_dict['월세']
                     else:
-                        Lower_price_key = price_type_key + ' 전용'+ area_type_key +'m²'+ Lower_price_dict['매매'] + Lower_price_dict['전세']+'원'
+                        Lower_price_key = price_type_key + ' ' + Lower_price_dict['매매'] + Lower_price_dict['전세']
                    
                 except:
                     Lower_price_key = Lower_price_key 
@@ -5580,6 +5771,58 @@ if Type_key == '위시':
                         Lower_price_key = '품절입니다'
                 except:
                     Lower_price_key = Lower_price_key
+                    
+            elif'peterpanz' in User_url: 
+                try:
+                    script_re = re.compile('(?<=houseContractType = \')\w+(?=\';)')
+                    houseContractType = script_re.findall(str(soup))[0]
+                    
+                    script_re = re.compile('(?<=houseDeposit = \')\d+(?=\';)')
+                    houseDeposit = int(script_re.findall(str(soup))[0])//10000
+
+                    script_re = re.compile('(?<=houseMonthlyFee = \')\d+(?=\';)')
+                    houseMonthlyFee = int(script_re.findall(str(soup))[0])//10000
+                    
+                    Lower_price_list = [houseDeposit, houseMonthlyFee]
+                    
+                    Lower_price_list_cal = []
+    
+                    for Lower_price_be in Lower_price_list:
+                        if Lower_price_be <= 0 :
+                            Lower_price_key_re = ''   
+
+                        elif Lower_price_be >= 10000: # 1억 이상
+                            Lower_price_key1 = f"{(Lower_price_be // 10000):,}억"
+                            Lower_price_key2 = Lower_price_be % 10000
+                            if Lower_price_key2 > 0:
+                                Lower_price_key_re = Lower_price_key1 + str(Lower_price_key2)
+                            else:
+                                 Lower_price_key_re = Lower_price_key1
+                        elif Lower_price_be >= 1: # 1만 이상
+                            Lower_price_key_re = Lower_price_be                   
+
+                        Lower_price_list_cal.append(Lower_price_key_re)
+                                        
+                    if houseContractType == '전세' or houseContractType == '매매':                    
+                        Lower_price_key = houseContractType + ' ' + str(Lower_price_list_cal[0]) 
+                    else:                
+                        Lower_price_key = houseContractType + ' ' + str(Lower_price_list_cal[0]) + '/' + str(Lower_price_list_cal[1])
+            
+                except:
+                    Lower_price_key = Lower_price_key  
+
+            elif'sooldamhwa' in User_url: 
+                try:
+                    Lower_price_key =  dict_result['props']['pageProps']['initialState']['damhwaMarket']['product']['discountPrice']
+                except:
+                    try:
+                        Lower_price_key =  dict_result['props']['pageProps']['initialState']['damhwaMarket']['product']['originPrice']
+                    except:
+                        Lower_price_key = Lower_price_key
+                        
+            elif'samsung.com' in User_url: 
+                Lower_price_key = soup.select_one('div.compare-itm-price').text
+
 
     #최저가가
 # 코리아센터 호스팅 가격 코드 -------------------------------------
@@ -5776,7 +6019,7 @@ if Type_key == '위시':
                     Lower_price_key = Lower_price_key.strip().replace(',','')
 
                 print("price_unit 변환된 값은? ", Lower_price_key)
-        # 아래 고도화 필요... 필요/불가 구분은 했지만 결국 로직을 따라가보면 실패한 것은 '해당~직접보기'로 되어 '확인필요'로 귀결
+        # 아래 고도화 필요... 필요/불가 구분은 했지만 결국 로직을 따라가보면 실패한 것은 '해당~직접보기'로 되어 '비교가를 찾을 수 없어요'로 귀결
         if Lower_price_key == "":
             Lower_price_key = "확인필요"
         elif Lower_price_key == "해당링크에서직접보기":
@@ -5877,10 +6120,10 @@ if Type_key == '위시':
 
             if Title_chosen_key == "해당 링크에서 직접 보기":
 
-                Title_searched_key = "확인필요"
-                Lower_price_searched_key = "확인필요"
-                Lower_mall_searched_key = "확인필요"
-                Lower_url_searched_key = "확인필요"
+                Title_searched_key = "비교가를 찾을 수 없어요"
+                Lower_price_searched_key = "비교가를 찾을 수 없어요"
+                Lower_mall_searched_key = "비교가를 찾을 수 없어요"
+                Lower_url_searched_key = "비교가를 찾을 수 없어요"
 
                 Title_searched.append(Title_searched_key)
                 Lower_price_searched.append(Lower_price_searched_key)
@@ -5951,10 +6194,10 @@ if Type_key == '위시':
                                 Lower_mall_searched_key = naver_shopping_list_dict_list['mallName']
                                 Lower_url_searched_key = naver_shopping_list_dict_list['crUrl']      
                     else:
-                        Title_searched_key = '검색결과 없음'
-                        Lower_price_searched_key = '검색결과 없음'
-                        Lower_mall_searched_key = '검색결과 없음'
-                        Lower_url_searched_key = '검색결과 없음'
+                        Title_searched_key = '비교된 상품이 없어요'
+                        Lower_price_searched_key = '비교된 상품이 없어요'
+                        Lower_mall_searched_key = '비교된 상품이 없어요'
+                        Lower_url_searched_key = '비교된 상품이 없어요'
         #         # ip 차단으로 인해 하기 코드 사용 불가
         #             User_url_api = 'https://search.shopping.naver.com/api/search/all?sort=rel&pagingIndex=1&pagingSize=40&viewType=list&productSet=total&deliveryFee=&deliveryTypeValue=&frm=NVSHATC&query=' + str(Title_chosen_key) + '&origQuery=' + str(Title_chosen_key)+ '&iq=&eq=&xq='
 
@@ -6013,11 +6256,11 @@ if Type_key == '위시':
                                 for Title_searched_key_trash_word in Title_searched_key_trash_words:
                                     Title_searched_key = Title_searched_key.replace(Title_searched_key_trash_word, "")
                             except:
-                                Title_searched_key = '확인필요'
+                                Title_searched_key = '비교가를 찾을 수 없어요'
                             try:
                                 Lower_price_searched_key = result_dict['items'][0]['lprice']
                             except:
-                                Lower_price_searched_key = '확인필요'
+                                Lower_price_searched_key = '비교가를 찾을 수 없어요'
                             try:
                                 Lower_mall_searched_key = result_dict['items'][0]['mallName']
                             except:
@@ -6025,7 +6268,7 @@ if Type_key == '위시':
                             try:
                                 Lower_url_searched_key = result_dict['items'][0]['link']
                             except:
-                                Lower_url_searched_key = '확인필요'
+                                Lower_url_searched_key = '비교가를 찾을 수 없어요'
 
                             try: #gate주소가 아닌  naver_catalog 주소 파악
                                 product_id_naver_mall_url_re = re.compile('(?<=id=)[0-9]+')
@@ -6047,10 +6290,10 @@ if Type_key == '위시':
                                 print('naver_catalog 주소 파악')
                                 Lower_url_searched_key = Lower_url_searched_key
                     except:
-                        Title_searched_key = '검색결과 없음'
-                        Lower_price_searched_key = '검색결과 없음'
-                        Lower_mall_searched_key = '검색결과 없음'
-                        Lower_url_searched_key = '검색결과 없음'
+                        Title_searched_key = '비교된 상품이 없어요'
+                        Lower_price_searched_key = '비교된 상품이 없어요'
+                        Lower_mall_searched_key = '비교된 상품이 없어요'
+                        Lower_url_searched_key = '비교된 상품이 없어요'
 
             # Lower_price_searched_key 전처리
 
@@ -6060,7 +6303,7 @@ if Type_key == '위시':
 
             if Lower_price_searched_key == "":
 
-                Lower_price_searched_key = "검색결과 없음"
+                Lower_price_searched_key = "비교된 상품이 없어요"
 
             else:        
                 Lower_price_searched_key = int(float(Lower_price_searched_key))   
@@ -6078,11 +6321,11 @@ if Type_key == '위시':
                     print("가격 비교 불가")
             
         else:
-            if Lower_price_key == '확인필요':
-                Title_searched_key = '확인필요'
-                Lower_price_searched_key = '확인필요'
-                Lower_mall_searched_key = '확인필요'
-                Lower_url_searched_key = '확인필요'
+            if Lower_price_key == '비교가를 찾을 수 없어요':
+                Title_searched_key = '비교가를 찾을 수 없어요'
+                Lower_price_searched_key = '비교가를 찾을 수 없어요'
+                Lower_mall_searched_key = '비교가를 찾을 수 없어요'
+                Lower_url_searched_key = '비교가를 찾을 수 없어요'
             else:
                 Title_searched_key = '-'
                 Lower_price_searched_key = '-'
@@ -6179,6 +6422,104 @@ except:
 
 # 설명 10번
 
+# # DB update
+
+#DB 오픈
+
+sql = '''
+SELECT * FROM posts
+'''
+cur.execute(sql)
+#userid 와 일치하는 posts_id 찾기
+
+#DB commit이 되었다면 / 전체 DB 중 userid 값을 id 값으로 가지고 있는 것 중에서 가장 마지막 행의 id 값 / 
+#DB commit이 안 되었다면 / 
+
+db_all_data = cur.fetchall() #fetch를 먹이면 tuple 형식으로 db data를 읽어옴
+db_last_data = db_all_data[-1]
+db_last_data_id = db_last_data[-9]
+if UserId == db_last_data_id:
+    posts_id = db_last_data[0] 
+print("posts_id: ", posts_id)
+
+
+all_list_expt_user_url = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
+
+for list_one in all_list_expt_user_url:
+    if len(list_one) == 0:
+        list_one.append("no_data")
+    elif len(list_one) > 1:
+        del list_one[0]
+        
+all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, 
+                  Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, 
+                  Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, 
+                  Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, 
+                  MyThema)
+
+sql = '''
+UPDATE posts SET
+    Type = %s, 
+    Category_in = %s, 
+    Distributor = %s, 
+    Publisher = %s, 
+    Category_out = %s, 
+    Logo_image = %s, 
+    Channel_logo = %s, 
+    Thumbnail_image = %s, 
+    User_url = %s, 
+    Title = %s, 
+    Maker = %s, 
+    Date = %s, 
+    Summary = %s, 
+    crawl_Content = %s, 
+    Emotion_cnt = %s, 
+    Comm_cnt = %s, 
+    Description = %s, 
+    Comment = %s, 
+    Tag = %s, 
+    View_cnt = %s, 
+    Duration = %s, 
+    Lower_price = %s, 
+    Lower_mall = %s, 
+    Lower_price_card = %s, 
+    Lower_mall_card = %s, 
+    Star_cnt = %s, 
+    Review_cnt = %s, 
+    Review_content = %s, 
+    Dscnt_rate = %s, 
+    Origin_price = %s, 
+    Dlvry_price = %s, 
+    Dlvry_date = %s, 
+    Model_no = %s, 
+    Color = %s, 
+    Location = %s, 
+    Title_searched = %s, 
+    Lower_price_searched = %s, 
+    Lower_mall_searched = %s, 
+    Lower_url_searched = %s, 
+    Mymemo = %s, 
+    MyThema = %s
+    WHERE id = %s
+'''
+
+
+# sql = '''
+# UPDATE posts SET
+#     Distributor = %s, Publisher = %s WHERE id = %s
+#     '''
+
+# cur.execute(sql, (Distributor, Publisher, posts_id, ))
+
+
+cur.execute(sql, (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema, posts_id, ))
+db.commit()
+
+# ("UPDATE accounts SET Q001 = %s, Q002 = %s WHERE id = %s", (Q001, Q002, session['id'],))
+print("save complete")
+
+db.close()
+
 # # 테스트
 # # DB_input
 
@@ -6189,9 +6530,9 @@ except:
 #     if len(list_one) == 0:
 #         list_one.append("no_data")
 
-# all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched)
+# all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema)
 
-# sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+# sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
 # cur.execute(sql, all_list_tuple)
 
@@ -6203,32 +6544,32 @@ except:
 
 # # 라니 오픈 (제이 클로즈)
 
-# # DB_input
+# DB_input
 
-dt_kst = datetime.datetime.utcnow() + datetime.timedelta(hours=9)
-createdAt = dt_kst
-updatedAt = dt_kst
+# dt_kst = datetime.datetime.utcnow() + datetime.timedelta(hours=9)
+# createdAt = dt_kst
+# updatedAt = dt_kst
 
-all_list = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
+# all_list = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
 
-for list_one in all_list:
-    if len(list_one) == 0:
-        list_one.append("no_data")
+# for list_one in all_list:
+#     if len(list_one) == 0:
+#         list_one.append("no_data")
 
-#DB 주의사항: all_list_tuple과 sql의 'INSERT INTO post ( 컬럼 )'의 인자들 순서를 동일하게 설정해야 함 (DB 내 칼럼 순서와 일치하지 않아도 됨)
-#다만, DB의 칼럼과 칼럼 명이 다르거나, DB에 칼럼을 새로 생성한다면, all_list_tuple과 sql에도 해당 인자를 추가해야 함
+# #DB 주의사항: all_list_tuple과 sql의 'INSERT INTO post ( 컬럼 )'의 인자들 순서를 동일하게 설정해야 함 (DB 내 칼럼 순서와 일치하지 않아도 됨)
+# #다만, DB의 칼럼과 칼럼 명이 다르거나, DB에 칼럼을 새로 생성한다면, all_list_tuple과 sql에도 해당 인자를 추가해야 함
 
-# all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId)
+# # all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId)
 
-# sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, createdAt, updatedAt, UserId) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), %s)"
-all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId, createdAt, updatedAt)
+# # sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, createdAt, updatedAt, UserId) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), %s)"
+# all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId, createdAt, updatedAt, Mymemo, MyThema)
 
-sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId, createdAt, updatedAt) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+# sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId, createdAt, updatedAt, Mymemo, MyThema) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
-cur.execute(sql, all_list_tuple)
+# cur.execute(sql, all_list_tuple)
 
-db.commit() 
-print("save complete")
+# db.commit() 
+# print("save complete")
 
-db.close()
+# db.close()
 
