@@ -6442,8 +6442,9 @@ except:
 
 try:
     db_all_data = cur.fetchall() #fetch를 먹이면 tuple 형식으로 db data를 읽어옴
-    print('db_all_data', db_all_data)
+#     print('db_all_data', db_all_data)
     db_last_data = db_all_data[-1]
+    print('db_all_data', db_all_data)
     db_last_data_id = db_last_data[-9]
     print('db_last_data_id', db_last_data_id)
     if UserId == db_last_data_id:
