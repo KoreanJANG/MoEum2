@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[4]:
+# In[12]:
 
 
 '''221110 ver1.30 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
@@ -88,10 +88,10 @@ Lower_url_searched = []
 # # 파이썬 실행시 파라미터로 url 받도록 수정
 User_url = sys.argv[1]
 UserId = sys.argv[2]
-Mymemo = sys.argv[3]
-MyThema = sys.argv[4]
-# Mymemo = ['Temp.memo']
-# MyThema = ['Temp.Thema']
+# Mymemo = sys.argv[3]
+# MyThema = sys.argv[4]
+Mymemo = ['Temp.memo']
+MyThema = ['Temp.Thema']
 
 
 start = time.time()  # 시작 시간 저장
@@ -6442,9 +6442,8 @@ except:
 
 try:
     db_all_data = cur.fetchall() #fetch를 먹이면 tuple 형식으로 db data를 읽어옴
-#     print('db_all_data', db_all_data)
     db_last_data = db_all_data[-1]
-    print('db_all_data', db_all_data)
+    print('db_last_data', db_last_data)
     db_last_data_id = db_last_data[-9]
     print('db_last_data_id', db_last_data_id)
     if UserId == db_last_data_id:
@@ -6631,4 +6630,27 @@ db.close()
 # print("save complete")
 
 # db.close()
+
+
+# In[11]:
+
+
+try:
+    db_all_data = cur.fetchall() #fetch를 먹이면 tuple 형식으로 db data를 읽어옴
+#     print('db_all_data', db_all_data)
+    db_last_data = db_all_data[-1]
+    print('db_all_data', db_all_data)
+    db_last_data_id = db_last_data[-9]
+    print('db_last_data_id', db_last_data_id)
+    if UserId == db_last_data_id:
+        posts_id = db_last_data[0] 
+    print("posts_id: ", posts_id)
+except:
+    print('NO_mysql db_data reading')
+
+
+# In[15]:
+
+
+db_last_data
 
