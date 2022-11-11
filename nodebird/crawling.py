@@ -6441,29 +6441,17 @@ except:
 #DB commit이 안 되었다면 / 
 
 try:
+    print("try2")
     db_all_data = cur.fetchall() #fetch를 먹이면 tuple 형식으로 db data를 읽어옴
     db_last_data = db_all_data[-1]
     print('db_last_data', db_last_data)
     db_last_data_id = db_last_data[-9]
     print('db_last_data_id', db_last_data_id)
     print('UserId ', UserId)
-    if UserId == db_last_data_id:
-        posts_id = db_last_data[0] 
-        print("posts_id: ", posts_id)
-
+    posts_id = db_last_data[0] 
+    print("posts_id: ", posts_id)        
 except:
-    try:
-        print("try2")
-        db_all_data = cur.fetchall() #fetch를 먹이면 tuple 형식으로 db data를 읽어옴
-        db_last_data = db_all_data[-1]
-        print('db_last_data', db_last_data)
-        db_last_data_id = db_last_data[-9]
-        print('db_last_data_id', db_last_data_id)
-        print('UserId ', UserId)
-        posts_id = db_last_data[0] 
-        print("posts_id: ", posts_id)        
-    except:
-        print('NO_mysql db_data reading')
+    print('NO_mysql db_data reading')
 
 all_list_expt_user_url = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
 
