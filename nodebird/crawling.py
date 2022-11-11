@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[7]:
+# In[1]:
 
 
 '''221110 ver1.30 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
@@ -88,8 +88,8 @@ Lower_url_searched = []
 # # 파이썬 실행시 파라미터로 url 받도록 수정
 User_url = sys.argv[1]
 UserId = sys.argv[2]
-Mymemo = sys.argv[3]
-MyThema = sys.argv[4]
+# Mymemo = sys.argv[3]
+# MyThema = sys.argv[4]
 # Mymemo = ['Temp.memo']
 # MyThema = ['Temp.Thema']
 
@@ -210,10 +210,11 @@ for list_one in all_list:
     if len(list_one) == 0:
         list_one.append("no_data")
 
-# all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched)
-all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema)
+all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched)
+# all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema)
 
-sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+# sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
 cur.execute(sql, all_list_tuple)
 db.commit()
@@ -6430,19 +6431,24 @@ except:
 sql = '''
 SELECT * FROM posts
 '''
-cur.execute(sql)
+try:
+    cur.execute(sql)
+except:
+    print('NO_mysql select, execute')
 #userid 와 일치하는 posts_id 찾기
 
 #DB commit이 되었다면 / 전체 DB 중 userid 값을 id 값으로 가지고 있는 것 중에서 가장 마지막 행의 id 값 / 
 #DB commit이 안 되었다면 / 
 
-db_all_data = cur.fetchall() #fetch를 먹이면 tuple 형식으로 db data를 읽어옴
-db_last_data = db_all_data[-1]
-db_last_data_id = db_last_data[-9]
-if UserId == db_last_data_id:
-    posts_id = db_last_data[0] 
-print("posts_id: ", posts_id)
-
+try:
+    db_all_data = cur.fetchall() #fetch를 먹이면 tuple 형식으로 db data를 읽어옴
+    db_last_data = db_all_data[-1]
+    db_last_data_id = db_last_data[-9]
+    if UserId == db_last_data_id:
+        posts_id = db_last_data[0] 
+    print("posts_id: ", posts_id)
+except:
+    print('NO_mysql db_data reading')
 
 all_list_expt_user_url = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
 
@@ -6452,11 +6458,62 @@ for list_one in all_list_expt_user_url:
     elif len(list_one) > 1:
         del list_one[0]
         
+# all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, 
+#                   Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, 
+#                   Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, 
+#                   Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, 
+#                   MyThema)
+
 all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, 
                   Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, 
                   Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, 
-                  Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, 
-                  MyThema)
+                  Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched)
+
+# sql = '''
+# UPDATE posts SET
+#     Type = %s, 
+#     Category_in = %s, 
+#     Distributor = %s, 
+#     Publisher = %s, 
+#     Category_out = %s, 
+#     Logo_image = %s, 
+#     Channel_logo = %s, 
+#     Thumbnail_image = %s, 
+#     User_url = %s, 
+#     Title = %s, 
+#     Maker = %s, 
+#     Date = %s, 
+#     Summary = %s, 
+#     crawl_Content = %s, 
+#     Emotion_cnt = %s, 
+#     Comm_cnt = %s, 
+#     Description = %s, 
+#     Comment = %s, 
+#     Tag = %s, 
+#     View_cnt = %s, 
+#     Duration = %s, 
+#     Lower_price = %s, 
+#     Lower_mall = %s, 
+#     Lower_price_card = %s, 
+#     Lower_mall_card = %s, 
+#     Star_cnt = %s, 
+#     Review_cnt = %s, 
+#     Review_content = %s, 
+#     Dscnt_rate = %s, 
+#     Origin_price = %s, 
+#     Dlvry_price = %s, 
+#     Dlvry_date = %s, 
+#     Model_no = %s, 
+#     Color = %s, 
+#     Location = %s, 
+#     Title_searched = %s, 
+#     Lower_price_searched = %s, 
+#     Lower_mall_searched = %s, 
+#     Lower_url_searched = %s, 
+#     Mymemo = %s, 
+#     MyThema = %s
+#     WHERE id = %s
+# '''
 
 sql = '''
 UPDATE posts SET
@@ -6498,22 +6555,18 @@ UPDATE posts SET
     Title_searched = %s, 
     Lower_price_searched = %s, 
     Lower_mall_searched = %s, 
-    Lower_url_searched = %s, 
-    Mymemo = %s, 
-    MyThema = %s
+    Lower_url_searched = %s
     WHERE id = %s
 '''
 
 
-# sql = '''
-# UPDATE posts SET
-#     Distributor = %s, Publisher = %s WHERE id = %s
-#     '''
+# cur.execute(sql, (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema, posts_id, ))
 
-# cur.execute(sql, (Distributor, Publisher, posts_id, ))
+try:
+    cur.execute(sql, (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, posts_id, ))
+except:
+    print('NO_last execute')
 
-
-cur.execute(sql, (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema, posts_id, ))
 db.commit()
 
 # ("UPDATE accounts SET Q001 = %s, Q002 = %s WHERE id = %s", (Q001, Q002, session['id'],))
