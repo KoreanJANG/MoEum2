@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# In[7]:
+
+
+#!/usr/bin/env python
+# coding: utf-8
+
 # In[12]:
 
 
-'''221110 ver1.30 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
+'''221111 ver1.31 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
 
               수정) 1. db 디폴트/크롤링 2중 저장
               2. 기타 코드 수정
@@ -93,8 +99,8 @@ User_url = sys.argv[1]
 UserId = sys.argv[2]
 # Mymemo = sys.argv[3]
 # MyThema = sys.argv[4]
-Mymemo = ['--']
-MyThema = ['--']
+Mymemo = ['메모(최대 20자)']
+MyThema = ['#테마']
 
 
 start = time.time()  # 시작 시간 저장
@@ -701,8 +707,6 @@ except:
     pass
 
 try:
-#     res = requests.get(User_url, timeout=5, headers=headers) #여기 중복 접속 삭제
-#     soup = BeautifulSoup(res.content, 'html.parser')
     
     print("응답코드 bs4 일반: ", res.status_code)
 
@@ -1441,7 +1445,6 @@ try:
     elif 'coupang.' in User_url: #뒤에 . 꼭 붙여야 coupangplay등 이랑 구분됨
     #설명 5번_script     
         #header 값을 fb로 잡아야 무한로딩 우회
-        headers = {'user-agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'} #여기
         headers = {'user-agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', 'Referer': 'https://www.naver.com/'}
 
         #일반 bs
@@ -6027,6 +6030,7 @@ if Type_key == '위시':
 
                 print("price_unit 변환된 값은? ", Lower_price_key)
         # 아래 고도화 필요... 필요/불가 구분은 했지만 결국 로직을 따라가보면 실패한 것은 '해당~직접보기'로 되어 '비교가를 찾을 수 없어요'로 귀결
+        
         if Lower_price_key == "":
             Lower_price_key = "확인필요"
         elif Lower_price_key == "해당링크에서직접보기":
@@ -6036,7 +6040,7 @@ if Type_key == '위시':
                 Lower_price_key = int(float(Lower_price_key))
             except:
                 Lower_price_key = Lower_price_key
-
+                
         if type(Lower_price_key) == int:
             Lower_price_key = format(Lower_price_key, ',')  + "원"
             Lower_price.append(Lower_price_key)
@@ -6328,7 +6332,7 @@ if Type_key == '위시':
                     print("가격 비교 불가")
             
         else:
-            if Lower_price_key == '비교가를 찾을 수 없어요':
+            if Lower_price_key == '확인필요':
                 Title_searched_key = '비교가를 찾을 수 없어요'
                 Lower_price_searched_key = '비교가를 찾을 수 없어요'
                 Lower_mall_searched_key = '비교가를 찾을 수 없어요'
@@ -6446,7 +6450,6 @@ except:
 #DB commit이 안 되었다면 / 
 
 try:
-    print("try2")
     db_all_data = cur.fetchall() #fetch를 먹이면 tuple 형식으로 db data를 읽어옴
     db_last_data = db_all_data[-1]
     print('db_last_data', db_last_data)
@@ -6457,7 +6460,11 @@ try:
     print("posts_id: ", posts_id)        
 except:
     print('NO_mysql db_data reading')
-
+if db_last_data_id == UserId:
+    print('UserId matching success')
+else:
+    print('NO_UserId matching success')
+    
 all_list_expt_user_url = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
 
 for list_one in all_list_expt_user_url:
