@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[7]:
 
 
-'''221109 ver1.29 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
+'''221110 ver1.30 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
 
-              수정) 1. 오류 문구 수정(검색결과 없음 - 비교된 상품이 없어요 / 확인필요 - 비교가를 찾을 수 없어요)
-              2. 기타 크롤링 및 키워드 추가
-              3. db-테마, 메모 추가
+              수정) 1. db 디폴트/크롤링 2중 저장
+              2. 기타 코드 수정
+              3. 오류 문구 수정
+              4. db - 테마, 메모 컬럼 추가
                      '''
 
 import requests
@@ -31,7 +32,7 @@ import datetime
 from collections import Counter, OrderedDict
 import random 
 
-# # data - mysql DB 접속 #라니 오픈
+# data - mysql DB 접속 #라니 오픈
 try:
     db = pymysql.connect(host="moum3.cjk00gposwcb.ap-northeast-2.rds.amazonaws.com", user='admin', password='fnucni1234!', db='moum', charset='utf8mb4')
     cur = db.cursor()
@@ -82,29 +83,142 @@ Lower_mall_searched = []
 Lower_url_searched = []
 
 
-# 라니 오픈
+# # 라니 오픈
 # # https://wikidocs.net/16049 참고
 # # 파이썬 실행시 파라미터로 url 받도록 수정
 User_url = sys.argv[1]
 UserId = sys.argv[2]
+Mymemo = sys.argv[3]
+MyThema = sys.argv[4]
+# Mymemo = ['Temp.memo']
+# MyThema = ['Temp.Thema']
 
-
-# Mymemo = sys.argv[3]
-# MyThema = sys.argv[4]
-
-# Mymemo = 'null'
-# MyThema = 'null'
 
 start = time.time()  # 시작 시간 저장
 
 # # 제이 오픈, 라니 클로즈
-# UserId = "test"
-# User_url = input('')
+# UserId = None
+# User_url = input("???")
 
-# 디폴트값 설정  #경로값 수정해야 함(서버 내 썸네일 파일 저장 필요)
+#Title_key
+try:
+    Title_key_default_re = re.compile('(?<=\/\/)(.*?)(?=\/)')
+    Title_key = Title_key_default_re.findall(User_url)[0]
+except:
+    Title_key = User_url
+Title.append(Title_key)    
 
-Thumbnail_image_key = 'https://lh3.googleusercontent.com/drive-viewer/AJc5JmQtu9w8WEBCv2de0MiHFyUdDp8Lk9sGAkHTl_b0d0bMbJzfU0wriDr9WGWLNE_hcoR8-USSsvA=w1920-h902' 
+#Thumbnail_image
+Thumbnail_image_key = 'https://lh3.googleusercontent.com/drive-viewer/AJc5JmQtu9w8WEBCv2de0MiHFyUdDp8Lk9sGAkHTl_b0d0bMbJzfU0wriDr9WGWLNE_hcoR8-USSsvA=w1920-h902' #라니(서버)
 Thumbnail_image.append(Thumbnail_image_key)
+
+#Distributor
+try:
+    User_url_domain_re = re.compile('https?://([A-Za-z_0-9.-]+).*')
+    User_url_domain = User_url_domain_re.findall(User_url)[0]
+    User_url_domain_list = re.split('\.|/|\?|&|=', User_url_domain)
+
+    User_url_delete_keywords = ['guide', 'app', 'show', 'https:', 'or', 'www', 'co', 'kr', 'onelink','page','link', 'www', 
+                                'se','io','in', 'tv','subium','go','net','me','m','com','store', 'place','map','brand', 'team',
+                               'toastoven', 'dn', 'au', 'org', 're']
+    
+    User_url_domain_list = list((Counter(User_url_domain_list) - Counter(User_url_delete_keywords)).elements())
+    Distributor_key = User_url_domain_list[-1]
+except:
+    Distributor_key = "해당 링크에서 직접 보기"
+Distributor.append(Distributor_key)
+
+#Category_in
+# Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
+#제이 경로
+# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+#     keyword_data = json.load(json_file)
+#토니 경로
+# with open('C:/Users\FNUCNI\Desktop\python/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+#     keyword_data = json.load(json_file)
+# #라니 경로
+with open('/home/ec2-user/MoEum2/nodebird/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+    keyword_data = json.load(json_file)
+
+Category_keyword_list = ['shopping', 'blog', 'sns', 'video', 'second', 'cafe', 'news', 'images', 'enter', 'reading', 'map']
+for Category_keyword_keyword in Category_keyword_list:
+    globals()["Category_in_keyword_list_{}".format(Category_keyword_keyword)] = keyword_data['Category_keyword'][Category_keyword_keyword]['Kor'] + keyword_data['Category_keyword'][Category_keyword_keyword]['Eng']
+
+Category_in_keyword_list_all = [Category_in_keyword_list_cafe, Category_in_keyword_list_news, 
+                                Category_in_keyword_list_shopping, Category_in_keyword_list_blog, Category_in_keyword_list_sns, 
+                                Category_in_keyword_list_video, Category_in_keyword_list_second, Category_in_keyword_list_images,
+                                Category_in_keyword_list_enter, Category_in_keyword_list_map, Category_in_keyword_list_reading]
+
+Category_in_keyword_dict = {'image' : Category_in_keyword_list_images, 'news' : Category_in_keyword_list_news, 
+                            'cafe' : Category_in_keyword_list_cafe, 'second' : Category_in_keyword_list_second, 
+                            'blog' : Category_in_keyword_list_blog, 'shopping' : Category_in_keyword_list_shopping, 
+                            'sns' : Category_in_keyword_list_sns, 'video' : Category_in_keyword_list_video,
+                            'enter' : Category_in_keyword_list_enter, 'map' : Category_in_keyword_list_map,
+                           'reading' : Category_in_keyword_list_reading}
+
+#참고: Category_in_keyword_dict 의 vlaues 값 중복 시 마지막 하나만 표현(dict 고유의 성격), 따라서 key값이 마지막것으로 표현됨
+
+Category_in_keyword_match_list_cnt_dict = dict()
+User_url_list = re.split('\.|/|\?|&|=', User_url)
+
+for Category_in_keyword_list_all_i in Category_in_keyword_list_all:
+    Category_in_keyword_match_list = list(set(User_url_list).intersection(Category_in_keyword_list_all_i))
+    Category_in_keyword_match_list_cnt = len(Category_in_keyword_match_list)
+    Category_in_keyword_match_list_cnt_dict[Category_in_keyword_match_list_cnt] = Category_in_keyword_list_all_i
+if max(Category_in_keyword_match_list_cnt_dict.keys()) == 0:
+    Category_in_key = "해당 링크에서 직접 보기"
+else:
+    Category_in_keyword_match_list_cnt_dict_keys_max_values = Category_in_keyword_match_list_cnt_dict[max(Category_in_keyword_match_list_cnt_dict.keys())]
+
+    for key, value in Category_in_keyword_dict.items():
+        if value == Category_in_keyword_match_list_cnt_dict_keys_max_values:
+            Category_in_key = key
+Category_in.append(Category_in_key)
+
+#Type
+
+if Category_in_key in ['news', 'cafe', 'blog', 'sns']:
+    Type_key = "글"
+
+elif Category_in_key in ['shopping', 'second']:
+    Type_key = "위시"
+
+elif Category_in_key in ['video', 'enter', 'reading']:
+    Type_key = "동영상" 
+
+# elif Category_in_key in ['sns', 'image']:
+#     Type_key = "이미지"
+
+#     # jpg 등 이미지 확장자가 url에 포함된 경우 이를 이미지로 분류
+# elif any(Category_in_keyword_list_image in User_url for Category_in_keyword_list_image in Category_in_keyword_list_images) == True:
+#     Type_key = "이미지"
+
+elif Category_in_key in ['map']:
+    Type_key = "지도"
+    
+else:
+    Type_key = "기타" #enter를 일단 기타로. image = 기타
+
+Type.append(Type_key)
+
+# default db input
+
+# all_list = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
+all_list = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
+
+for list_one in all_list:
+    if len(list_one) == 0:
+        list_one.append("no_data")
+
+# all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched)
+all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema)
+
+sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+
+cur.execute(sql, all_list_tuple)
+db.commit()
+print('Title_key: ', Title_key, " / Distributor_key: ", Distributor_key, " / Category_in_key: ", Category_in_key, " / Type_key: ", Type_key)
+print("default db commit 완료")
 
 #설명 1번
 
@@ -259,7 +373,7 @@ User_url_list_Distributor = User_url_list[0:7]
 print("User_url_list_Distributor는 ", User_url_list_Distributor)
 
 # 설명 2번
-# Keyword 데이터 호출 
+# Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
 #제이 경로
 # with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
@@ -292,7 +406,7 @@ try:
 
     User_url_delete_keywords = ['guide', 'app', 'show', 'https:', 'or', 'www', 'co', 'kr', 'onelink','page','link', 'www', 
                                 'se','io','in', 'tv','subium','go','net','me','m','com','store', 'place','map','brand', 'team',
-                               'toastoven', 'dn', 'au']
+                               'toastoven', 'dn', 'au', 'org', 're']
     User_url_domain_list = list((Counter(User_url_domain_list) - Counter(User_url_delete_keywords)).elements())
     Distributor_key = User_url_domain_list[-1]
 except:
@@ -532,8 +646,8 @@ else:
     print("Distributor_key값은? ", Distributor_key)
 
 # 설명 4번
-# Type 파악
 
+# Type 파악
 try:
     count_all_shopping_second = Category_in_keyword_shopping_count + Category_in_keyword_second_count
     count_all_blog_sns_cafe_news = Category_in_keyword_blog_count + Category_in_keyword_sns_count + Category_in_keyword_cafe_count + Category_in_keyword_news_count
@@ -544,13 +658,10 @@ try:
     if max(count_all) == 0:
         Type_key = "기타"
     elif max(count_all) == count_all_blog_sns_cafe_news:
-        print('count_all_blog_sns_cafe_news가 max임')
         Type_key = '글'
     elif max(count_all) == count_all_shopping_second:
-        print('count_all_shopping_second가 max임')
         Type_key = '위시'
     elif max(count_all) == count_all_video_enter_reading:
-        print('count_all_video_enter_reading가 max임')
         Type_key = '동영상'   
 
     # elif Category_in_key in ['sns', 'image']:
@@ -3889,7 +4000,7 @@ try:
     print("Duration 리스트 값은, ", Duration) 
 except:
     pass
-    
+   
 # Title_key 자체의 Trash_keyword 제거
 try:
     font_trash_word_re = re.compile('\<font.*?\>')
@@ -3906,11 +4017,14 @@ for Title_key_trash_word in Title_key_trash_words:
 #Title_key 디폴트 값
 
 if Title_key == '해당 링크에서 직접 보기' or 'denied' in Title_key or 'Denied' in Title_key:
-    Title_key_default_re = re.compile('(?<=\/\/)(.*?)(?=\/)')
-    Title_key_default = Title_key_default_re.findall(User_url)[0]
-    # .replace('https', '').replace('http', '').replace('m.', '').replace('www', '').replace(':', '').replace('kr.', '').strip(' /.')
+    try:
+        Title_key_default_re = re.compile('(?<=\/\/)(.*?)(?=\/)')
+        Title_key_default = Title_key_default_re.findall(User_url)[0]
+        # .replace('https', '').replace('http', '').replace('m.', '').replace('www', '').replace(':', '').replace('kr.', '').strip(' /.')
 
-    Title_key = Title_key_default
+        Title_key = Title_key_default
+    except:
+        Title_key = User_url
 Title.append(Title_key.strip())    
 
 # Desc. trash_word 제거
@@ -5715,16 +5829,19 @@ if Type_key == '위시':
 # 코리아센터 호스팅 가격 코드 -------------------------------------
 
             elif 'branduid'in User_url: 
- 
-                try:
-                    script_re = re.compile('(?<=var product_price =).+(?=;)')
-                    Lower_price_key = script_re.findall(str(soup))[0]
-                except:
+                if "sto_state:'SALE'" in str(soup):
                     try:
-                        script_re = re.compile('(?<=var prd_sellprice    =).+(?=;)')
+                        script_re = re.compile('(?<=var product_price =).+(?=;)')
                         Lower_price_key = script_re.findall(str(soup))[0]
                     except:
-                        Lower_price_key = Lower_price_key 
+                        try:
+                            script_re = re.compile('(?<=var prd_sellprice    =).+(?=;)')
+                            Lower_price_key = script_re.findall(str(soup))[0]
+                        except:
+                            Lower_price_key = Lower_price_key                 
+                        
+                else:   
+                    Lower_price_key =  '품절인가봐요'
                     
 # NHN 고도몰 가격 코드 -------------------------------------
 
@@ -6306,6 +6423,104 @@ except:
 
 # 설명 10번
 
+# # DB update
+
+#DB 오픈
+
+sql = '''
+SELECT * FROM posts
+'''
+cur.execute(sql)
+#userid 와 일치하는 posts_id 찾기
+
+#DB commit이 되었다면 / 전체 DB 중 userid 값을 id 값으로 가지고 있는 것 중에서 가장 마지막 행의 id 값 / 
+#DB commit이 안 되었다면 / 
+
+db_all_data = cur.fetchall() #fetch를 먹이면 tuple 형식으로 db data를 읽어옴
+db_last_data = db_all_data[-1]
+db_last_data_id = db_last_data[-9]
+if UserId == db_last_data_id:
+    posts_id = db_last_data[0] 
+print("posts_id: ", posts_id)
+
+
+all_list_expt_user_url = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
+
+for list_one in all_list_expt_user_url:
+    if len(list_one) == 0:
+        list_one.append("no_data")
+    elif len(list_one) > 1:
+        del list_one[0]
+        
+all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, 
+                  Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, 
+                  Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, 
+                  Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, 
+                  MyThema)
+
+sql = '''
+UPDATE posts SET
+    Type = %s, 
+    Category_in = %s, 
+    Distributor = %s, 
+    Publisher = %s, 
+    Category_out = %s, 
+    Logo_image = %s, 
+    Channel_logo = %s, 
+    Thumbnail_image = %s, 
+    User_url = %s, 
+    Title = %s, 
+    Maker = %s, 
+    Date = %s, 
+    Summary = %s, 
+    crawl_Content = %s, 
+    Emotion_cnt = %s, 
+    Comm_cnt = %s, 
+    Description = %s, 
+    Comment = %s, 
+    Tag = %s, 
+    View_cnt = %s, 
+    Duration = %s, 
+    Lower_price = %s, 
+    Lower_mall = %s, 
+    Lower_price_card = %s, 
+    Lower_mall_card = %s, 
+    Star_cnt = %s, 
+    Review_cnt = %s, 
+    Review_content = %s, 
+    Dscnt_rate = %s, 
+    Origin_price = %s, 
+    Dlvry_price = %s, 
+    Dlvry_date = %s, 
+    Model_no = %s, 
+    Color = %s, 
+    Location = %s, 
+    Title_searched = %s, 
+    Lower_price_searched = %s, 
+    Lower_mall_searched = %s, 
+    Lower_url_searched = %s, 
+    Mymemo = %s, 
+    MyThema = %s
+    WHERE id = %s
+'''
+
+
+# sql = '''
+# UPDATE posts SET
+#     Distributor = %s, Publisher = %s WHERE id = %s
+#     '''
+
+# cur.execute(sql, (Distributor, Publisher, posts_id, ))
+
+
+cur.execute(sql, (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema, posts_id, ))
+db.commit()
+
+# ("UPDATE accounts SET Q001 = %s, Q002 = %s WHERE id = %s", (Q001, Q002, session['id'],))
+print("save complete")
+
+db.close()
+
 # # 테스트
 # # DB_input
 
@@ -6316,9 +6531,9 @@ except:
 #     if len(list_one) == 0:
 #         list_one.append("no_data")
 
-# all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched)
+# all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema)
 
-# sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+# sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, Mymemo, MyThema) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
 # cur.execute(sql, all_list_tuple)
 
@@ -6330,32 +6545,32 @@ except:
 
 # # 라니 오픈 (제이 클로즈)
 
-# # DB_input
+# DB_input
 
-dt_kst = datetime.datetime.utcnow() + datetime.timedelta(hours=9)
-createdAt = dt_kst
-updatedAt = dt_kst
+# dt_kst = datetime.datetime.utcnow() + datetime.timedelta(hours=9)
+# createdAt = dt_kst
+# updatedAt = dt_kst
 
-all_list = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
+# all_list = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
 
-for list_one in all_list:
-    if len(list_one) == 0:
-        list_one.append("no_data")
+# for list_one in all_list:
+#     if len(list_one) == 0:
+#         list_one.append("no_data")
 
-#DB 주의사항: all_list_tuple과 sql의 'INSERT INTO post ( 컬럼 )'의 인자들 순서를 동일하게 설정해야 함 (DB 내 칼럼 순서와 일치하지 않아도 됨)
-#다만, DB의 칼럼과 칼럼 명이 다르거나, DB에 칼럼을 새로 생성한다면, all_list_tuple과 sql에도 해당 인자를 추가해야 함
+# #DB 주의사항: all_list_tuple과 sql의 'INSERT INTO post ( 컬럼 )'의 인자들 순서를 동일하게 설정해야 함 (DB 내 칼럼 순서와 일치하지 않아도 됨)
+# #다만, DB의 칼럼과 칼럼 명이 다르거나, DB에 칼럼을 새로 생성한다면, all_list_tuple과 sql에도 해당 인자를 추가해야 함
 
-# all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId)
+# # all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId)
 
-# sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, createdAt, updatedAt, UserId) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), %s)"
-all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId, createdAt, updatedAt)
+# # sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, createdAt, updatedAt, UserId) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW(), %s)"
+# all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId, createdAt, updatedAt, Mymemo, MyThema)
 
-sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId, createdAt, updatedAt) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+# sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall,Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color,Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId, createdAt, updatedAt, Mymemo, MyThema) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
-cur.execute(sql, all_list_tuple)
+# cur.execute(sql, all_list_tuple)
 
-db.commit() 
-print("save complete")
+# db.commit() 
+# print("save complete")
 
-db.close()
+# db.close()
 
