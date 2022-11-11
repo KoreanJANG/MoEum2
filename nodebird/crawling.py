@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[12]:
+# In[18]:
 
 
 '''221110 ver1.30 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
@@ -89,19 +89,19 @@ updatedAt = dt_kst
 # # 라니 오픈
 # # https://wikidocs.net/16049 참고
 # # 파이썬 실행시 파라미터로 url 받도록 수정
-User_url = sys.argv[1]
-UserId = sys.argv[2]
-Mymemo = sys.argv[3]
-MyThema = sys.argv[4]
-# Mymemo = ['Temp.memo']
-# MyThema = ['Temp.Thema']
+# User_url = sys.argv[1]
+# UserId = sys.argv[2]
+# Mymemo = sys.argv[3]
+# MyThema = sys.argv[4]
+Mymemo = ['Temp.memo']
+MyThema = ['Temp.Thema']
 
 
 start = time.time()  # 시작 시간 저장
 
 # # 제이 오픈, 라니 클로즈
-# UserId = None
-# User_url = input("???")
+UserId = None
+User_url = input("???")
 
 #Title_key
 try:
@@ -142,14 +142,14 @@ Distributor.append(Distributor_key)
 #Category_in
 # Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
 #제이 경로
-# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
-#     keyword_data = json.load(json_file)
+with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+    keyword_data = json.load(json_file)
 #토니 경로
 # with open('C:/Users\FNUCNI\Desktop\python/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 # #라니 경로
-with open('/home/ec2-user/MoEum2/nodebird/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
-    keyword_data = json.load(json_file)
+# with open('/home/ec2-user/MoEum2/nodebird/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+#     keyword_data = json.load(json_file)
 
 Category_keyword_list = ['shopping', 'blog', 'sns', 'video', 'second', 'cafe', 'news', 'images', 'enter', 'reading', 'map']
 for Category_keyword_keyword in Category_keyword_list:
@@ -215,15 +215,17 @@ Type.append(Type_key)
 # default db input
 
 # all_list = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
-all_list = Title, Distributor, Category_in, Type
+all_list = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId, createdAt, updatedAt, Mymemo, MyThema
+
 for list_one in all_list:
     if len(list_one) == 0:
-        list_one.append("no_data")
+        list_one.append("--")
 
 # all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched)
 all_list_tuple = (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId, createdAt, updatedAt, Mymemo, MyThema)
 
 sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched, UserId, createdAt, updatedAt, Mymemo, MyThema) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+
 # sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
 cur.execute(sql, all_list_tuple)
@@ -386,14 +388,14 @@ print("User_url_list_Distributor는 ", User_url_list_Distributor)
 # 설명 2번
 # Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
 #제이 경로
-# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
-#     keyword_data = json.load(json_file)
+with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+    keyword_data = json.load(json_file)
 #토니 경로
 # with open('C:/Users\FNUCNI\Desktop\python/21109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 # #라니 경로
-with open('/home/ec2-user/MoEum2/nodebird/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
-    keyword_data = json.load(json_file)
+# with open('/home/ec2-user/MoEum2/nodebird/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+#     keyword_data = json.load(json_file)
 
 # url - Distributor_keyword list match
 
