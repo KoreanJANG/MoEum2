@@ -91,10 +91,10 @@ updatedAt = dt_kst
 # # 파이썬 실행시 파라미터로 url 받도록 수정
 User_url = sys.argv[1]
 UserId = sys.argv[2]
-Mymemo = sys.argv[3]
-MyThema = sys.argv[4]
-# Mymemo = ['Temp.memo']
-# MyThema = ['Temp.Thema']
+# Mymemo = sys.argv[3]
+# MyThema = sys.argv[4]
+Mymemo = ['메모 작성 가능!']
+MyThema = ['테마 선택 가능!']
 
 
 start = time.time()  # 시작 시간 저장
