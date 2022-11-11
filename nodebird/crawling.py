@@ -89,19 +89,19 @@ updatedAt = dt_kst
 # # 라니 오픈
 # # https://wikidocs.net/16049 참고
 # # 파이썬 실행시 파라미터로 url 받도록 수정
-# User_url = sys.argv[1]
-# UserId = sys.argv[2]
-# Mymemo = sys.argv[3]
-# MyThema = sys.argv[4]
-Mymemo = ['Temp.memo']
-MyThema = ['Temp.Thema']
+User_url = sys.argv[1]
+UserId = sys.argv[2]
+Mymemo = sys.argv[3]
+MyThema = sys.argv[4]
+# Mymemo = ['Temp.memo']
+# MyThema = ['Temp.Thema']
 
 
 start = time.time()  # 시작 시간 저장
 
 # # 제이 오픈, 라니 클로즈
-UserId = None
-User_url = input("???")
+# UserId = None
+# User_url = input("???")
 
 #Title_key
 try:
@@ -142,14 +142,14 @@ Distributor.append(Distributor_key)
 #Category_in
 # Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
 #제이 경로
-with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
-    keyword_data = json.load(json_file)
+# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+#     keyword_data = json.load(json_file)
 #토니 경로
 # with open('C:/Users\FNUCNI\Desktop\python/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 # #라니 경로
-# with open('/home/ec2-user/MoEum2/nodebird/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
-#     keyword_data = json.load(json_file)
+with open('/home/ec2-user/MoEum2/nodebird/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+    keyword_data = json.load(json_file)
 
 Category_keyword_list = ['shopping', 'blog', 'sns', 'video', 'second', 'cafe', 'news', 'images', 'enter', 'reading', 'map']
 for Category_keyword_keyword in Category_keyword_list:
@@ -388,14 +388,14 @@ print("User_url_list_Distributor는 ", User_url_list_Distributor)
 # 설명 2번
 # Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
 #제이 경로
-with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
-    keyword_data = json.load(json_file)
+# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+#     keyword_data = json.load(json_file)
 #토니 경로
 # with open('C:/Users\FNUCNI\Desktop\python/21109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 # #라니 경로
-# with open('/home/ec2-user/MoEum2/nodebird/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
-#     keyword_data = json.load(json_file)
+with open('/home/ec2-user/MoEum2/nodebird/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+    keyword_data = json.load(json_file)
 
 # url - Distributor_keyword list match
 
