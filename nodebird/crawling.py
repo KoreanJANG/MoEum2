@@ -91,10 +91,10 @@ updatedAt = dt_kst
 # # 파이썬 실행시 파라미터로 url 받도록 수정
 User_url = sys.argv[1]
 UserId = sys.argv[2]
-# Mymemo = sys.argv[3]
-# MyThema = sys.argv[4]
-Mymemo = ['Temp.memo']
-MyThema = ['Temp.Thema']
+Mymemo = sys.argv[3]
+MyThema = sys.argv[4]
+# Mymemo = ['Temp.memo']
+# MyThema = ['Temp.Thema']
 
 
 start = time.time()  # 시작 시간 저장
@@ -104,6 +104,14 @@ start = time.time()  # 시작 시간 저장
 # User_url = input("???")
 
 #Title_key
+try:
+    User_url = re.findall('http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$\-@\.&+#:\/?=_]|[!*\(\),]|(?:%[0-9a-zA-Z][0-9a-zA-Z]))+', User_url)[0]
+    print('포맷체크 완료, ', User_url)
+except:
+    print('포맷체크 실패, User_url 수정(https://www. 삭제 후 추가)')
+    User_url = re.sub(r'http[s]?://|www.', '', User_url)
+    User_url = 'https://www.' + User_url
+    print('포맷수정된 User_url?, ', User_url)
 try:
     Title_key_default_re = re.compile('(?<=\/\/)(.*?)(?=\/)')
     Title_key = Title_key_default_re.findall(User_url)[0]
@@ -207,8 +215,7 @@ Type.append(Type_key)
 # default db input
 
 # all_list = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
-all_list = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, User_url, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
-
+all_list = Title, Distributor, Category_in, Type
 for list_one in all_list:
     if len(list_one) == 0:
         list_one.append("no_data")
@@ -6455,7 +6462,10 @@ try:
     print("posts_id: ", posts_id)        
 except:
     print('NO_mysql db_data reading')
-
+if  db_last_data_id == UserId:
+    print('UserId matching success')
+else:
+    print('NO_UserId matching success')
 all_list_expt_user_url = Type, Category_in, Distributor, Publisher, Category_out, Logo_image, Channel_logo, Thumbnail_image, Title, Maker, Date, Summary, crawl_Content, Emotion_cnt, Comm_cnt, Description, Comment, Tag, View_cnt, Duration, Lower_price, Lower_mall, Lower_price_card, Lower_mall_card, Star_cnt, Review_cnt, Review_content, Dscnt_rate, Origin_price, Dlvry_price, Dlvry_date, Model_no, Color, Location, Title_searched, Lower_price_searched, Lower_mall_searched, Lower_url_searched
 
 for list_one in all_list_expt_user_url:
