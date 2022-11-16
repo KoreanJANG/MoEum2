@@ -1,21 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[7]:
+# In[3]:
 
 
-#!/usr/bin/env python
-# coding: utf-8
+'''221116 ver1.32 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
 
-# In[12]:
-
-
-'''221111 ver1.31 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
-
-              수정) 1. db 디폴트/크롤링 2중 저장
-              2. 기타 코드 수정
-              3. 오류 문구 수정
-              4. db - 테마, 메모 컬럼 추가
+              수정) 1. keyword.json - domain_keyword 추가: 해당 도메인네임이 있으면 Type_key 구분 100% (Categoty_out 활용)
+              2. 기타 오류 코드 수정
                      '''
 
 import requests
@@ -100,7 +92,7 @@ UserId = sys.argv[2]
 # Mymemo = sys.argv[3]
 # MyThema = sys.argv[4]
 Mymemo = ['메모(최대 20자)']
-MyThema = ['#테마']
+MyThema = ['테마']
 
 
 start = time.time()  # 시작 시간 저장
@@ -128,7 +120,7 @@ except:
 Title.append(Title_key)    
 
 #Thumbnail_image
-Thumbnail_image_key = 'https://lh3.googleusercontent.com/drive-viewer/AJc5JmQtu9w8WEBCv2de0MiHFyUdDp8Lk9sGAkHTl_b0d0bMbJzfU0wriDr9WGWLNE_hcoR8-USSsvA=w1920-h902' #라니(서버)
+Thumbnail_image_key = 'https://lh3.googleusercontent.com/drive-viewer/AJc5JmQtu9w8WEBCv2de0MiHFyUdDp8Lk9sGAkHTl_b0d0bMbJzfU0wriDr9WGWLNE_hcoR8-USSsvA=w1920-h902'
 Thumbnail_image.append(Thumbnail_image_key)
 
 #Distributor
@@ -137,9 +129,7 @@ try:
     User_url_domain = User_url_domain_re.findall(User_url)[0]
     User_url_domain_list = re.split('\.|/|\?|&|=', User_url_domain)
 
-    User_url_delete_keywords = ['guide', 'app', 'show', 'https:', 'or', 'www', 'co', 'kr', 'onelink','page','link', 'www', 
-                                'se','io','in', 'tv','subium','go','net','me','m','com','store', 'place','map','brand', 'team',
-                               'toastoven', 'dn', 'au', 'org', 're']
+    User_url_delete_keywords = keyword_data['Condition_keyword']['User_url_delete_keywords']
     
     User_url_domain_list = list((Counter(User_url_domain_list) - Counter(User_url_delete_keywords)).elements())
     Distributor_key = User_url_domain_list[-1]
@@ -147,18 +137,37 @@ except:
     Distributor_key = "해당 링크에서 직접 보기"
 Distributor.append(Distributor_key)
 
-#Category_in
+
 # Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
 #제이 경로
-# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 #토니 경로
-# with open('C:/Users\FNUCNI\Desktop\python/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+# with open('C:/Users\FNUCNI\Desktop\python/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 # #라니 경로
 with open('/home/ec2-user/MoEum2/nodebird/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
     keyword_data = json.load(json_file)
 
+#Categoty_out
+domain_dict = {}
+for key, value in keyword_data['domain_keyword'].items():
+    for domain_name in value:
+        if domain_name in User_url:
+            p = re.compile(domain_name)
+            m = p.search(User_url).span()
+            m_minus = m[1] - m[0]
+            print("domain_name: ", domain_name, " / key: ", key, " / m: ", m, " / m_miuns: ",  m_minus)
+
+            domain_dict[m_minus] = key
+try:            
+    Category_out_key = domain_dict[max(domain_dict.keys())]
+except:
+    Category_out_key = '해당 링크에서 직접 보기'
+Category_out.append(Category_out_key)
+print("Category_out_key? ", Category_out_key)
+
+#Category_in
 Category_keyword_list = ['shopping', 'blog', 'sns', 'video', 'second', 'cafe', 'news', 'images', 'enter', 'reading', 'map']
 for Category_keyword_keyword in Category_keyword_list:
     globals()["Category_in_keyword_list_{}".format(Category_keyword_keyword)] = keyword_data['Category_keyword'][Category_keyword_keyword]['Kor'] + keyword_data['Category_keyword'][Category_keyword_keyword]['Eng']
@@ -193,30 +202,47 @@ else:
         if value == Category_in_keyword_match_list_cnt_dict_keys_max_values:
             Category_in_key = key
 Category_in.append(Category_in_key)
+print("Category_in_key? ", Category_in_key)
 
 #Type
 
-if Category_in_key in ['news', 'cafe', 'blog', 'sns']:
-    Type_key = "글"
-
-elif Category_in_key in ['shopping', 'second']:
-    Type_key = "위시"
-
-elif Category_in_key in ['video', 'enter', 'reading']:
-    Type_key = "동영상" 
-
-# elif Category_in_key in ['sns', 'image']:
-#     Type_key = "이미지"
-
-#     # jpg 등 이미지 확장자가 url에 포함된 경우 이를 이미지로 분류
-# elif any(Category_in_keyword_list_image in User_url for Category_in_keyword_list_image in Category_in_keyword_list_images) == True:
-#     Type_key = "이미지"
-
-elif Category_in_key in ['map']:
-    Type_key = "지도"
+try:
+    if Category_out_key in ["shop", "second", "cross_border", "real_estate", "trip", "car", "rent", "class_learn", "delivery", "app_market", "air_ticket"]:
+        Type_key = "위시"
+    elif Category_out_key in ["news", "magazine"]:
+        Type_key = "글" #아티클
+    elif Category_out_key in ["video", "music", "webtoon_novel", "education", "audio"]:
+        Type_key = "동영상" #콘텐츠
+    elif Category_out_key in ["map", "reservation"]:
+        Type_key = "지도" #장소
+    elif Category_out_key in ["homepage", "blog", "cafe", "portal", "community", "sns"]:
+        Type_key = "기타" #정보
+    else:
+        pass
+    print("Category_out_key에 따른 Type_key? ", Type_key)
     
-else:
-    Type_key = "기타" #enter를 일단 기타로. image = 기타
+except:
+    if Category_in_key in ['news', 'cafe', 'blog', 'sns']:
+        Type_key = "글"
+
+    elif Category_in_key in ['shopping', 'second']:
+        Type_key = "위시"
+
+    elif Category_in_key in ['video', 'enter', 'reading']:
+        Type_key = "동영상" 
+
+    # elif Category_in_key in ['sns', 'image']:
+    #     Type_key = "이미지"
+
+    #     # jpg 등 이미지 확장자가 url에 포함된 경우 이를 이미지로 분류
+    # elif any(Category_in_keyword_list_image in User_url for Category_in_keyword_list_image in Category_in_keyword_list_images) == True:
+    #     Type_key = "이미지"
+
+    elif Category_in_key in ['map']:
+        Type_key = "지도"
+
+    else:
+        Type_key = "기타" #enter를 일단 기타로. image = 기타
 
 Type.append(Type_key)
 
@@ -387,10 +413,10 @@ print("User_url_list_Distributor는 ", User_url_list_Distributor)
 # 설명 2번
 # Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
 #제이 경로
-# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 #토니 경로
-# with open('C:/Users\FNUCNI\Desktop\python/21109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+# with open('C:/Users\FNUCNI\Desktop\python/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 # #라니 경로
 with open('/home/ec2-user/MoEum2/nodebird/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
@@ -416,9 +442,8 @@ try:
     User_url_domain = User_url_domain_re.findall(User_url)[0]
     User_url_domain_list = re.split('\.|/|\?|&|=', User_url_domain)
 
-    User_url_delete_keywords = ['guide', 'app', 'show', 'https:', 'or', 'www', 'co', 'kr', 'onelink','page','link', 'www', 
-                                'se','io','in', 'tv','subium','go','net','me','m','com','store', 'place','map','brand', 'team',
-                               'toastoven', 'dn', 'au', 'org', 're']
+    User_url_delete_keywords = keyword_data['Condition_keyword']['User_url_delete_keywords']
+    
     User_url_domain_list = list((Counter(User_url_domain_list) - Counter(User_url_delete_keywords)).elements())
     Distributor_key = User_url_domain_list[-1]
 except:
@@ -448,6 +473,24 @@ try:
 except:
     pass
 # 설명 3번
+
+# Category_out
+
+for key, value in keyword_data['domain_keyword'].items():
+    for domain_name in value:
+        if domain_name in User_url:
+            p = re.compile(domain_name)
+            m = p.search(User_url).span()
+            m_minus = m[1] - m[0]
+            print("domain_name: ", domain_name, " / key: ", key, "m: ", m, "m_miuns: ",  m_minus)
+
+            domain_dict[m_minus] = key
+try:            
+    Category_out_key = domain_dict[max(domain_dict.keys())]
+except:
+    Category_out_key = '해당 링크에서 직접 보기'
+Category_out.append(Category_out_key)    
+print("Category_out_key? ", Category_out_key)
 
 # Category_in_keyword input
 
@@ -661,36 +704,52 @@ else:
 
 # Type 파악
 try:
-    count_all_shopping_second = Category_in_keyword_shopping_count + Category_in_keyword_second_count
-    count_all_blog_sns_cafe_news = Category_in_keyword_blog_count + Category_in_keyword_sns_count + Category_in_keyword_cafe_count + Category_in_keyword_news_count
-    count_all_video_enter_reading = Category_in_keyword_video_count + Category_in_keyword_enter_count + Category_in_keyword_reading_count
-
-    count_all = [count_all_shopping_second, count_all_blog_sns_cafe_news, count_all_video_enter_reading, Category_in_keyword_map_count]
-
-    if max(count_all) == 0:
-        Type_key = "기타"
-    elif max(count_all) == count_all_blog_sns_cafe_news:
-        Type_key = '글'
-    elif max(count_all) == count_all_shopping_second:
-        Type_key = '위시'
-    elif max(count_all) == count_all_video_enter_reading:
-        Type_key = '동영상'   
-
-    # elif Category_in_key in ['sns', 'image']:
-    #     Type_key = "이미지"
-
-    #     # jpg 등 이미지 확장자가 url에 포함된 경우 이를 이미지로 분류
-    # elif any(Category_in_keyword_list_image in User_url for Category_in_keyword_list_image in Category_in_keyword_list_images) == True:
-    #     Type_key = "이미지"
-
-    elif Category_in_key in ['map'] or max(count_all) == Category_in_keyword_map_count:
-        Type_key = "지도"
-
+    if Category_out_key in ["shop", "second", "cross_border", "real_estate", "trip", "car", "rent", "class_learn", "delivery", "app_market", "air_ticket"]:
+        Type_key = "위시"
+    elif Category_out_key in ["news", "magazine"]:
+        Type_key = "글" #아티클
+    elif Category_out_key in ["video", "music", "webtoon_novel", "education", "audio"]:
+        Type_key = "동영상" #콘텐츠
+    elif Category_out_key in ["map", "reservation"]:
+        Type_key = "지도" #장소
+    elif Category_out_key in ["homepage", "blog", "cafe", "portal", "community", "sns"]:
+        Type_key = "기타" #정보
+    if Category_out_key != "해당 링크에서 직접 보기":
+        print("Category_out_key에 따른 Type_key? ", Type_key)
     else:
-        Type_key = "기타" #enter를 일단 기타로. image = 기타
+        pass
 except:
-    print("category_count 파악 불가")
-    Type_key = "기타"
+    try:
+        count_all_shopping_second = Category_in_keyword_shopping_count + Category_in_keyword_second_count
+        count_all_blog_sns_cafe_news = Category_in_keyword_blog_count + Category_in_keyword_sns_count + Category_in_keyword_cafe_count + Category_in_keyword_news_count
+        count_all_video_enter_reading = Category_in_keyword_video_count + Category_in_keyword_enter_count + Category_in_keyword_reading_count
+
+        count_all = [count_all_shopping_second, count_all_blog_sns_cafe_news, count_all_video_enter_reading, Category_in_keyword_map_count]
+
+        if max(count_all) == 0:
+            Type_key = "기타"
+        elif max(count_all) == count_all_blog_sns_cafe_news:
+            Type_key = '글'
+        elif max(count_all) == count_all_shopping_second:
+            Type_key = '위시'
+        elif max(count_all) == count_all_video_enter_reading:
+            Type_key = '동영상'   
+
+        # elif Category_in_key in ['sns', 'image']:
+        #     Type_key = "이미지"
+
+        #     # jpg 등 이미지 확장자가 url에 포함된 경우 이를 이미지로 분류
+        # elif any(Category_in_keyword_list_image in User_url for Category_in_keyword_list_image in Category_in_keyword_list_images) == True:
+        #     Type_key = "이미지"
+
+        elif Category_in_key in ['map'] or max(count_all) == Category_in_keyword_map_count:
+            Type_key = "지도"
+
+        else:
+            Type_key = "기타" #enter를 일단 기타로. image = 기타
+    except:
+        print("category_count 파악 불가")
+        Type_key = "기타"
 
 Type.append(Type_key)
 print("Type 리스트 값은 ", Type)
@@ -1139,7 +1198,7 @@ try:
                     dict_result_script_api = json.loads(soup_api.text)
                     try: 
                         Lower_price_key = dict_result_script_api['result']['saleInfo']['price']
-                        Lower_price.append(Lower_price_key)
+#                         Lower_price.append(Lower_price_key)
                         print("네이버 중고나라 가격은?, ", Lower_price)
                     except:
                         pass
@@ -2523,10 +2582,21 @@ try:
             Thumbnail_image_key = Thumbnail_image_key
 
     elif 'lfmall' in User_url:
+        product_id_lf_re = re.compile('(?<=product\/)\w+')
+        product_id_lf = product_id_lf_re.findall(User_url)[0]
+
+        User_url_api = 'https://nxapi.lfmall.co.kr/product/v1/relateProduct/' + product_id_lf
+        
+        res_api = requests.get(User_url_api, timeout=3, headers=headers) 
+        script_api = BeautifulSoup(res_api.text, 'html.parser').text
+        dict_script_api = json.loads(script_api)
         try:
-            script_re = re.compile('(?<=image: \').*(?=\?)')
-            Thumbnail_image_key = script_re.findall(str(soup))[0]                    
-        except:    
+            Title_key = dict_script_api['body']['relateProductDTOList'][0]['name']
+        except:
+            Title_key = Title_key
+        try:
+            Thumbnail_image_key = dict_script_api['body']['relateProductDTOList'][0]['images'][0]['appImageUrl']
+        except:        
             Thumbnail_image_key = Thumbnail_image_key             
             
     elif 'amazon' in User_url:  
@@ -3834,6 +3904,49 @@ try:
                     Description_key = dict_result['props']['pageProps']['initialState']['damhwaMarket']['product']['subText']
                 except:
                     Description_key = Description_key
+                    
+    elif 'hottracks'in User_url: 
+        try:
+            Title_key = soup.select_one('meta[property="eg:itemName"]')['content']               
+        except:
+            Title_key_key = Title_key             
+        try:
+            Thumbnail_image_key = soup.select_one('meta[property="eg:itemImage"]')['content']              
+        except:
+            Thumbnail_image_key = Thumbnail_image_key    
+            
+    elif 'frip' in User_url: 
+        product_id_re = re.compile('(?<=products\/)[0-9]+')
+        product_id = product_id_re.findall(User_url)[0] 
+        User_url_frip_api = 'https://gql.frip.co.kr/graphql'
+
+        headers = {
+        'Accept': '*/*',
+        'authority': 'gql.frip.co.kr',
+        'accept-encoding': 'gzip, deflate, br',
+        'content-type': 'application/json',
+        'referer':'https://www.frip.co.kr/',
+        'origin': 'https://www.frip.co.kr',
+        'user-agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.366' 
+        }
+
+        payload = {
+        'operationName': 'GetProductDetailPageData',
+        'variables': {'id':product_id, 'relatedProductId': int(product_id)},
+        'query':'query GetProductDetailPageData($id: ID!, $relatedProductId: Int) {\n  product {\n    product(id: $id) {\n      id\n      headerContents {\n        content {\n          thumbnail(fetchFormat: AUTO, crop: FILL, devicePixelRatio: 2.0, width: 375, aspectRatio: \"1:1\")\n        }\n      }\n      title\n      catchphrase\n      period {\n        startedAt\n        endedAt\n      }\n      categories {\n        displayCategory {\n          id\n          label {\n            name\n          }\n          parent {\n            id\n            label {\n              name\n            }\n            parent {\n              id\n              label {\n                name\n              }\n              parent {\n                id\n                label {\n                  name\n                }\n              }\n            }\n          }\n        }\n      }\n      standardCategories {\n        id\n        label {\n          name\n        }\n      }\n      representativePrice {\n        discountRate\n        retail\n        sale\n      }\n      host {\n        id\n        name\n        super\n        wishInfo {\n          count\n          isWishedByMe\n        }\n        productReviewInfo {\n          count\n        }\n        productInfo {\n          counts {\n            count\n            status\n          }\n        }\n        profileImage {\n          thumbnail(fetchFormat: AUTO, crop: FILL, devicePixelRatio: 2.0, width: 56, aspectRatio: \"1:1\")\n        }\n      }\n      inventoryTargetType\n      reviewInfo {\n        count\n        rating\n        ratingRatio {\n          rating\n          count\n          ratio\n        }\n        reviews(size: 30) {\n          edges {\n            node {\n              id\n              content\n              writer {\n                id\n                nickname\n                profileImage {\n                  thumbnail(fetchFormat: AUTO, crop: FILL, devicePixelRatio: 2.0, width: 40, aspectRatio: \"1:1\")\n                }\n              }\n              thumbsUpCount\n              thumbsUp\n              attachmentContents {\n                thumbnail(fetchFormat: AUTO, crop: FILL, devicePixelRatio: 2.0, width: 220, aspectRatio: \"1:1\")\n              }\n            }\n          }\n        }\n      }\n      firstPurchasableSchedule {\n        id\n      }\n      frip {\n        attachedToSchedule\n        daysOfExpiration\n        difficulty\n        recommendedAge\n        curriculum {\n          title\n          style\n          sections {\n            etc\n            id\n            items {\n              content\n              duration\n              id\n              term {\n                endingTime {\n                  hour\n                  minute\n                }\n                startingTime {\n                  hour\n                  minute\n                }\n              }\n              textTime\n            }\n            title\n          }\n        }\n        exclusions\n        inclusions\n        locationsOfVenue {\n          id\n          address\n          geoPoint {\n            latitude\n            longitude\n          }\n          label\n          overseas\n          location {\n            conveniences {\n              name\n            }\n            parking {\n              available\n              note\n            }\n          }\n        }\n        locationOfGathering {\n          id\n          address\n          geoPoint {\n            latitude\n            longitude\n          }\n          label\n          overseas\n          location {\n            conveniences {\n              name\n            }\n            parking {\n              available\n              note\n            }\n          }\n        }\n        stuffsToPrepare\n      }\n      underageRestricted\n      banner {\n        content {\n          thumbnail\n        }\n      }\n      contents {\n        content\n      }\n      kind\n      notice\n      status\n      wishInfo {\n        count\n        isWishedByMe\n      }\n      refundPolicy {\n        description\n      }\n    }\n    recommendedProducts(filter: {relatedProductId: $relatedProductId}) {\n      ...ListingProductNodeFragment\n    }\n  }\n}\n\nfragment ListingProductNodeFragment on ListingProduct {\n  id\n  title\n  catchphrase\n  price\n  salePrice\n  type\n  reviewCount\n  rating\n  headerContents {\n    content {\n      id\n      type\n      width\n      height\n      uri\n      thumbnail(fetchFormat: AUTO, crop: FILL, devicePixelRatio: 2.0, width: 310, aspectRatio: \"1:1\")\n    }\n  }\n  almostSoldOut\n  status\n  kind\n  tags {\n    id\n    name\n    textColor\n    backgroundColor\n    kind\n    status\n  }\n  defaultArea {\n    id\n    name\n    depth\n    seqNo\n    status\n  }\n  wished\n  __typename\n}\n'}
+        res = requests.post(User_url_frip_api, headers=headers, json =  payload, timeout = 10) 
+        soup = BeautifulSoup(res.content,"html.parser")
+ 
+        dict_post_api = json.loads(soup.text)
+    
+        try:
+            Title_key = dict_post_api['data']['product']['product']['title']
+        except:
+            Title_key = Title_key
+        try:
+            Thumbnail_image_key = dict_post_api['data']['product']['product']['headerContents'][0]['content']['thumbnail']
+        except:
+            Thumbnail_image_key = Thumbnail_image_key
                 
 #3요소소
             
@@ -3926,90 +4039,197 @@ except:
     Description_key = Description_key
     Thumbnail_image_key = Thumbnail_image_key
 
-# Duration_key 설정
-if Type_key == '동영상':
+# # Duration_key 설정
+# if Type_key == '동영상':
+#     if Distributor_key == "youtube":
+#         try:
+#             Duration_key = soup.select_one(
+#                 'meta[itemprop="duration"]')['content']
+#             Duration_key = Duration_key.replace(
+#                 "PT", "").replace("M", "분 ").replace("S", "초")
+#         except:
+#             Duration_key = "해당 링크에서 직접 보기"
+#     elif Distributor_key == "naver":
+#         try: # naver.com/vod 
+#             script_re = re.compile('(?<=vod = ).+(?=;)')
+#             script_text = script_re.findall(str(soup))[0]
+#             dict_result_script_text = json.loads(script_text)
+
+#             Title_key = dict_result_script_text['title']
+
+#             Thumbnail_image_key = dict_result_script_text['thumbnail']
+
+#             Description_key = dict_result_script_text['searchData']
+
+#             try:
+#                 Duration_key = dict_result_script_text['playTime']
+#             except:
+#                 try:
+#                     Duration_key = str(dict_result_script_text['playTimeMinute']) + '분' + str(dict_result_script_text['playTimeSecond']) +'초'
+#                 except:
+#                     try:
+#                         Duration_key = str(dict_result_script_text['playTimeToSecond']) + '초'
+#                     except:
+#                         Duration_key = "해당 링크에서 직접 보기"
+
+#         except: # tv.naver.com
+#             try:
+#                 Duration_key = soup.select_one('em.time').text
+#             except:
+#                 try:
+#                     Duration_key = soup.select_one('meta[property="naver:video:play_time"]')['content']
+#                 except:
+#                     Duration_key = "해당 링크에서 직접 보기"
+                    
+#     elif Distributor_key == "afreecatv":
+#         try:
+#             script = soup.select_one('script[type="application/ld+json"]').text
+#             dict_result_script_text = json.loads(str(script))
+
+#             Duration_key = dict_result_script_text['duration']
+#             Duration_key = int(re.sub(r'(\D)', '', Duration_key))
+#             Duration_key_minute, Duration_key_second= divmod(Duration_key, 60)
+
+#             Duration_key = str(Duration_key_minute) + '분 ' + str(Duration_key_second) + '초'
+#         except:
+#             Duration_key = "해당 링크에서 직접 보기"
+
+#     elif Distributor_key == "coupangplay":
+#         try:
+#             Duration_key = dict_result_script_api['data']['running_time_friendly'].replace("h", "시간").replace("m", "분 ").replace("s", "초")
+#         except:
+#             try:
+#                 Duration_key = str(round(int(dict_result_script_api['data']['running_time'])/60)) + '분'
+#             except:
+#                 Duration_key = "해당 링크에서 직접 보기"
+                
+#     elif Distributor_key == "kakao" or Distributor_key == "daum":
+#         try:
+#             Duration_key = result_dict['clipLink']['clip']['duration']
+#             Duration_key1, Duration_key2 = divmod(int(Duration_key), 60)
+#             Duration_key = str(Duration_key1) +'분 ' + str(Duration_key2) + '초' 
+#         except:
+#             try:    
+#                 Duration_key = dict_result_script_text['duration']
+#                 Duration_key = Duration_key.replace("PT", "").replace("H", "시간").replace("M", "분").replace("S", "초") 
+#             except:
+#                 Duration_key = "해당 링크에서 직접 보기"
+#     else:
+#         pass
+
+# try:
+#     Duration.append(Duration_key)
+#     print("Duration 리스트 값은, ", Duration) 
+# except:
+#     pass
+
+#duration
+if Type_key == '동영상': #콘텐츠
+
+    def duration_cal(time_key):
+        time_key = time_key.replace("PT", "").replace("S", "")
+        index = time_key.find("M")
+        if int(time_key[:index])>60:
+            duration_key = str(int(time_key[:index])//60) +":" + str(int(time_key[:index])% 60).zfill(2) +":" +time_key[index+1:].zfill(2)
+        else:
+            duration_key = time_key[:index] +":" +time_key[index+1:].zfill(2)
+        return duration_key
+
     if Distributor_key == "youtube":
         try:
-            Duration_key = soup.select_one(
-                'meta[itemprop="duration"]')['content']
-            Duration_key = Duration_key.replace(
-                "PT", "").replace("M", "분 ").replace("S", "초")
+            time_key = soup.select_one('meta[itemprop="duration"]')['content']
+            Duration_key = duration_cal(time_key)
         except:
-            Duration_key = "해당 링크에서 직접 보기"
+            Duration_key = ""
+
     elif Distributor_key == "naver":
-        try: # naver.com/vod 
-            script_re = re.compile('(?<=vod = ).+(?=;)')
-            script_text = script_re.findall(str(soup))[0]
-            dict_result_script_text = json.loads(script_text)
-
-            Title_key = dict_result_script_text['title']
-
-            Thumbnail_image_key = dict_result_script_text['thumbnail']
-
-            Description_key = dict_result_script_text['searchData']
+        if 'now' in User_url or 'tv'in User_url:
 
             try:
-                Duration_key = dict_result_script_text['playTime']
+                time_key = soup.select_one('meta[property="naver:video:play_time"]')['content']
+                Duration_key = str(datetime.timedelta(seconds=int(time_key)))
             except:
+                Duration_key = ""
+
+
+            try:
+                # naver.com/vod 
+                script_re = re.compile('(?<=vod = ).+(?=;)')
+                script_text = script_re.findall(str(soup))[0]
+                dict_result_script_text = json.loads(script_text)
+
+                Title_key = dict_result_script_text['title']
+
+                Thumbnail_image_key = dict_result_script_text['thumbnail']
+
+                Description_key = dict_result_script_text['searchData']
                 try:
-                    Duration_key = str(dict_result_script_text['playTimeMinute']) + '분' + str(dict_result_script_text['playTimeSecond']) +'초'
+                    Duration_key = dict_result_script_text['playTime']
                 except:
                     try:
-                        Duration_key = str(dict_result_script_text['playTimeToSecond']) + '초'
+                        Duration_key = str(dict_result_script_text['playTimeMinute']) + ':' + str(dict_result_script_text['playTimeSecond']) +'초'
                     except:
-                        Duration_key = "해당 링크에서 직접 보기"
-
-        except: # tv.naver.com
-            try:
-                Duration_key = soup.select_one('em.time').text
+                        try:
+                            Duration_key = str(dict_result_script_text['playTimeToSecond']) 
+                        except:
+                            Duration_key = ""
             except:
-                try:
-                    Duration_key = soup.select_one('meta[property="naver:video:play_time"]')['content']
-                except:
-                    Duration_key = "해당 링크에서 직접 보기"
-                    
-    elif Distributor_key == "afreecatv":
+                Duration_key = ""
+
+    elif 'tv.nate' in User_url:
+        try:
+            script = soup.select_one('script[type="application/json"]').text
+            dict_result_script_text = json.loads(str(script))
+
+            time_key = dict_result_script_text['props']['pageProps']['videoDetailView']['playTime']
+
+            Duration_key = str(datetime.timedelta(seconds=int(time_key)))
+        except:
+            Duration_key = ""             
+
+    elif 'vod.afreecatv' in User_url:
         try:
             script = soup.select_one('script[type="application/ld+json"]').text
             dict_result_script_text = json.loads(str(script))
 
-            Duration_key = dict_result_script_text['duration']
-            Duration_key = int(re.sub(r'(\D)', '', Duration_key))
-            Duration_key_minute, Duration_key_second= divmod(Duration_key, 60)
+            time_key = dict_result_script_text['duration']
+            time_key = int(re.sub(r'(\D)', '',time_key))
 
-            Duration_key = str(Duration_key_minute) + '분 ' + str(Duration_key_second) + '초'
+            Duration_key = str(datetime.timedelta(seconds=time_key))
         except:
-            Duration_key = "해당 링크에서 직접 보기"
+            Duration_key = ""
 
-    elif Distributor_key == "coupangplay":
-        try:
-            Duration_key = dict_result_script_api['data']['running_time_friendly'].replace("h", "시간").replace("m", "분 ").replace("s", "초")
-        except:
-            try:
-                Duration_key = str(round(int(dict_result_script_api['data']['running_time'])/60)) + '분'
-            except:
-                Duration_key = "해당 링크에서 직접 보기"
-                
     elif Distributor_key == "kakao" or Distributor_key == "daum":
         try:
-            Duration_key = result_dict['clipLink']['clip']['duration']
-            Duration_key1, Duration_key2 = divmod(int(Duration_key), 60)
-            Duration_key = str(Duration_key1) +'분 ' + str(Duration_key2) + '초' 
+            script = soup.select_one('script[type="application/ld+json"]').text
+            dict_result_script_text = json.loads(str(script))
+            time_key = dict_result_script_text['duration']
+            Duration_key = duration_cal(time_key)            
         except:
             try:    
-                Duration_key = dict_result_script_text['duration']
-                Duration_key = Duration_key.replace("PT", "").replace("H", "시간").replace("M", "분").replace("S", "초") 
+                Duration_key = dict_result_script_text['duration']                
+                Duration_key = Duration_key.replace("PT", "").replace("H", ":").replace("M", ":").replace("S", "") 
             except:
-                Duration_key = "해당 링크에서 직접 보기"
+                try:
+                    Duration_key = result_dict['clipLink']['clip']['duration']
+                    Duration_key1, Duration_key2 = divmod(int(Duration_key), 60)
+                    Duration_key = str(Duration_key1) +':' + str(Duration_key2) 
+                except:
+                    try:
+                        script_text = soup.select_one('script[type="application/json"]').text
+                        dict_result_script_text = json.loads(script_text)
+                        Duration_key = dict_result_script_text['props']['pageProps']['initialList']['slots'][0]['item']['durationText']
+                    except:
+                        Duration_key = ""           
+    else:
+        Duration_key = ""
+
+    if Duration_key != "":
+        Duration.append(Duration_key)
+        print("Duration 리스트 값은, ", Duration) 
     else:
         pass
 
-try:
-    Duration.append(Duration_key)
-    print("Duration 리스트 값은, ", Duration) 
-except:
-    pass
-   
 # Title_key 자체의 Trash_keyword 제거
 try:
     font_trash_word_re = re.compile('\<font.*?\>')
@@ -4472,27 +4692,34 @@ if Type_key == '위시':
                         Lower_price_key = Lower_price_key
 
             elif 'lfmall' in User_url:  
-                try:
-                    Lower_price_key = soup.select_one('span.current_price').text
+                try: 
+                    User_url_api = 'https://nxapi.lfmall.co.kr/product/v1/price/' + product_id_lf
+                    res_api = requests.get(User_url_api, timeout=5, headers = headers) 
+                    dict_script_price_api = json.loads(res_api.text)
+
+                    Lower_price_key = dict_script_price_api['body']['productPriceDTO']['salePrice']
                 except:
                     try:
-                        product_id_lfmall_re = re.compile('(?<=PROD_CD=)[0-9A-Z]+')
-
-                        product_id_lfmall1 = product_id_lfmall_re.findall(User_url)
-
-                        for product_id_lfmall in product_id_lfmall1:
-                            User_url_api = 'https://mapi.lfmall.co.kr/api/products/detail/detailOptionItems?productId=' + str(product_id_lfmall)
-
-                        res_api = requests.get(User_url_api, timeout=5, headers = headers) 
-                        print(User_url_api)
-                        if res_api.status_code != 200:
-                            print("User_url_api 접속 오류입니다")
-
-                        result_dict = json.loads(res_api.text)
-
-                        Lower_price_key = int(result_dict['results']['productDetailOption']['productDetailOptionItems'][0]['salePrice'])
+                        Lower_price_key = soup.select_one('span.current_price').text
                     except:
-                        Lower_price_key = Lower_price_key
+                        try:
+                            product_id_lfmall_re = re.compile('(?<=PROD_CD=)[0-9A-Z]+')
+
+                            product_id_lfmall1 = product_id_lfmall_re.findall(User_url)
+
+                            for product_id_lfmall in product_id_lfmall1:
+                                User_url_api = 'https://mapi.lfmall.co.kr/api/products/detail/detailOptionItems?productId=' + str(product_id_lfmall)
+
+                            res_api = requests.get(User_url_api, timeout=5, headers = headers) 
+                            print(User_url_api)
+                            if res_api.status_code != 200:
+                                print("User_url_api 접속 오류입니다")
+
+                            result_dict = json.loads(res_api.text)
+
+                            Lower_price_key = int(result_dict['results']['productDetailOption']['productDetailOptionItems'][0]['salePrice'])
+                        except:
+                            Lower_price_key = Lower_price_key
 
             elif '.nsmall' in User_url: 
                 try:
@@ -5283,50 +5510,7 @@ if Type_key == '위시':
                     try: 
                         Lower_price_key = result_dict['data']['productPrice']['price']
                     except:
-                        Lower_price_key = Lower_price_key
-
-#             elif 'fitpetmall' in User_url: 
-#                 script_text = soup.select_one('script[type="application/json"]').text
-#                 dict_result = json.loads(script_text)
-#                 fitpet_id = dict_result['props']['pageProps']['data']['product']['id']
-#                 print("확인중",fitpet_id)
-                
-    
-#                 User_url_fitpetmall_api = 'https://api.fitpetmall.com/mall/graphql'
-
-#                 headers = {
-#                 'Accept': '*/*',
-#                 'authority': 'api.fitpetmall.com',
-#                 'accept-encoding': 'gzip, deflate, br',
-#                 'content-type': 'application/json',
-#                 'referer': User_url,
-#                 'origin': 'https://www.fitpetmall.com',
-#                 'user-agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36' 
-#                 }
-
-#                 payload = {
-#                 'operationName': 'productBenefits',
-#                 'variables': {'id': fitpet_id},
-#                 'query':'query productBenefits($id: ID!, $productPromotion: ID) {\n  product(id: $id, productPromotion: $productPromotion) {\n    id\n    productPromotionCustomerPrice\n    maxDiscountCoupon {\n      id\n      couponGroup {\n        name\n        discountType\n        discountAmount\n        discountRate\n        maxDiscountAmount\n        couponType\n        issueType\n        __typename\n      }\n      __typename\n    }\n    reviewMileage\n    orderConfirmMileage\n    reviewMileageRate\n    orderConfirmMileageRate\n    __typename\n  }\n}\n'    
-#                 }
-
-#                 res = requests.post(User_url_fitpetmall_api, headers=headers, json =  payload, timeout = 10) 
-#                 soup = BeautifulSoup(res.content,"html.parser")
- 
-#                 dict_post_api = json.loads(soup.text)
- 
-    
-#                 try:
-#                     Lower_price_key = dict_post_api['data']['productQnas']['edges'][0]['node']['productOption']['productPromotionCustomerPrice']
-#                 except:
-#                     try:
-#                         Lower_price_key = dict_post_api['data']['productQnas']['edges'][0]['node']['productOption']['customerPrice']
-#                     except:
-#                         try:
-#                             Lower_price_key = dict_post_api['data']['productQnas']['edges'][0]['node']['productOption']['price']
-#                         except:
-#                             Lower_price_key = Lower_price_key
-                        
+                        Lower_price_key = Lower_price_key                        
                         
             elif 'dailyhotel' in User_url: 
                 try:
@@ -5832,6 +6016,65 @@ if Type_key == '위시':
                         
             elif'samsung.com' in User_url: 
                 Lower_price_key = soup.select_one('div.compare-itm-price').text
+                
+            elif 'kyobobook' in User_url:
+                try:      
+                     Lower_price_key = soup.select_one('span.price').get_text()                 
+                except:
+                    try:
+                        Lower_price_key = soup.select_one('meta[property="eg:salePrice"]')['content'] 
+                    except:
+                          Lower_price_key = Lower_price_key 
+                            
+            elif 'triple' in User_url:  
+                try:
+                    Lower_price_key  = content_triple['props']['pageProps']['product']['sales']['salePrice']
+                except:
+                    Lower_price_key = Lower_price_key
+                    
+            elif'frip' in User_url: 
+                try:
+                    Lower_price_key =  dict_post_api['data']['product']['product']['representativePrice']['sale']
+                except:
+                    try:
+                        Lower_price_key = dict_post_api['data']['product']['product']['representativePrice']['retail']
+                    except:
+                        Lower_price_key = Lower_price_key    
+                        
+            elif 'fitpetmall' in User_url: 
+                script_text = soup.select_one('script[type="application/json"]').text
+                dict_result = json.loads(script_text)
+                fitpet_id = dict_result['props']['pageProps']['data']['product']['id']
+                
+                promotion_id_re = re.compile('(?<=promotion=)\w+')
+                promotion_id = promotion_id_re.findall(User_url)[0]  
+    
+                User_url_fitpetmall_api = 'https://api.fitpetmall.com/mall/graphql'
+
+                headers = {
+                'Accept': '*/*',
+                'authority': 'api.fitpetmall.com',
+                'accept-encoding': 'gzip, deflate, br',
+                'content-type': 'application/json',
+                'referer': User_url,
+                'origin': 'https://www.fitpetmall.com',
+                'user-agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36' 
+                }
+
+                payload = {
+                'operationName': 'productBenefits',
+                'variables': {'id': fitpet_id, "productPromotion": promotion_id},
+                'query':'query productBenefits($id: ID!, $productPromotion: ID) {\n  product(id: $id, productPromotion: $productPromotion) {\n    id\n    productPromotionCustomerPrice\n    maxDiscountCoupon {\n      id\n      couponGroup {\n        name\n        discountType\n        discountAmount\n        discountRate\n        maxDiscountAmount\n        couponType\n        issueType\n        __typename\n      }\n      __typename\n    }\n    reviewMileage\n    orderConfirmMileage\n    reviewMileageRate\n    orderConfirmMileageRate\n    __typename\n  }\n}\n'}
+
+                res = requests.post(User_url_fitpetmall_api, headers=headers, json =  payload, timeout = 10) 
+                soup = BeautifulSoup(res.content,"html.parser")
+ 
+                dict_post_api = json.loads(soup.text)
+    
+                try:
+                    Lower_price_key = dict_post_api['data']['product']['productPromotionCustomerPrice']
+                except:
+                    Lower_price_key = Lower_price_key
 
 
     #최저가가
@@ -5992,6 +6235,8 @@ if Type_key == '위시':
         no_unit_change_keywords = keyword_data['Condition_keyword']['no_unit_change_keywords']['Kor'] + keyword_data['Condition_keyword']['no_unit_change_keywords']['Eng']
         if any(no_unit_change_keyword in User_url for no_unit_change_keyword in no_unit_change_keywords) == True:
             pass
+        elif Lower_price_key == "해당 링크에서 직접 보기" or Lower_price_key == "확인불가":
+            pass
         else:
             if any(money_exchange_keyword in User_url for money_exchange_keyword in money_exchange_keywords) == True:
                 try:
@@ -6002,10 +6247,16 @@ if Type_key == '위시':
                         naver_usd = soup.select_one('span.spt_con.up > strong').text.strip().replace(',','')
                     except:
                         naver_usd = soup.select_one('span.spt_con.dw > strong').text.strip().replace(',','')
+                    unit_d_list = ['usd', 'USD', '$', 'dollars']
+                    for unit_d in unit_d_list:
+                        if unit_d in Lower_price_key:
+                            Lower_price_key = Lower_price_key.replace(unit_d, '')
                     Lower_price_key = str(int(round((float(Lower_price_key) * float(naver_usd)),0)))
                     print("달러 환율 적용한 Lower_price_key 값은? ", Lower_price_key, " 현재 원달러 환율: ", naver_usd)
                 except:
                     Lower_price_key = Lower_price_key
+#             elif float(Lower_price_key) %1 > 0 or float(Lower_price_key) < 100 : #아직 외화 전체 처리 가능한지 검토중
+#                 Lower_price_key = "해당 링크에서 직접 보기"
             else:
                 Lower_price_key = re.sub(r'(\s)', '', str(Lower_price_key))
 
