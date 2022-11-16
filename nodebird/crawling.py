@@ -156,7 +156,7 @@ Distributor.append(Distributor_key)
 # with open('C:/Users\FNUCNI\Desktop\python/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 # #라니 경로
-with open('/home/ec2-user/MoEum2/nodebird/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+with open('/home/ec2-user/MoEum2/nodebird/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
     keyword_data = json.load(json_file)
 
 Category_keyword_list = ['shopping', 'blog', 'sns', 'video', 'second', 'cafe', 'news', 'images', 'enter', 'reading', 'map']
@@ -393,7 +393,7 @@ print("User_url_list_Distributor는 ", User_url_list_Distributor)
 # with open('C:/Users\FNUCNI\Desktop\python/21109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 # #라니 경로
-with open('/home/ec2-user/MoEum2/nodebird/221109_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+with open('/home/ec2-user/MoEum2/nodebird/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
     keyword_data = json.load(json_file)
 
 # url - Distributor_keyword list match
