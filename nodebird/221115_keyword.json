@@ -136,9 +136,7 @@
     "User_url_delete_keywords":["guide","app","show","https:","or","www","co","kr","onelink","page","link","www","se","io","in","tv","subium","go","net","me","m","com",
     "store","place","map","brand","team","toastoven","dn","au","org","re","ca", "gg"]
   },
-  // 도메인_키워드 : 도메인네임으로 100% 그 사이트의 타입이 결정되는 사이트들의 도메인 키워드
   "domain_keyword":{
-    //위시
     "shop": ["uniqlo", "11st", "coupang", "musinsa", "a-bly", "zigzag", "brandi", "gmarket", "oliveyoung", "wemakeprice", "idus", "auction", "gsshop", "smartstore", 
     "hnsmall", "cjonstyle", "tmon", "interpark", "29cm", "hfashionmall", "ikea", "lfmall", "nsmall", "sivillage", "ssfshop", "ssg", "gucci", "cartier", "nike", 
     "wconcept", "thehandsome", "nbkorea", "dior", "lotteimall", "louisvuitton", "homeplus", "mustit", "musinsaapp", "moulian", "balaan", "burberry", "chanel", 
@@ -156,7 +154,6 @@
     "delivery":["baemin", "yogiyo", "coupangeats"],
     "app_market":["play.google.com", "apps.apple.com"],
     "air_ticket":["koreanair", "flyasiana", "skyscanner", "jejuair", "twayair"],
-    //아티클
     "news":["abcnews", "bbc", "biz.chosun", "bloomberg", "bosa.co", "asiae.co", "cbsnews", "cctoday", "chosun.com", "cnn", "daejonilbo", "dailian", "dailydental", "dailymedi", 
     "dailynk", "ddanzi", "dnews", "docdocdoc", "doctorsnews", "donga.com", "economist", "economy21", "edaily", "ekn.kr", "eroun.net", "espn", "etoday", "fashionn.com", "fnnews", 
     "forbes.com", "foxnews", "futurekorea", "hani.co", "hankookilbo", "hankyung", "heraldbiz", "huffingtonpost", "ihalla", "imbc", "incheonilbo", "inews24", "insight", 
@@ -170,17 +167,14 @@
     "whosaeng", "wsj.com", "yeongnam", "yna.co", "ziksir", "zine.istyle24", "news.naver", "news.zum.com", "v.daum.net"],
     "magazine":["allurekorea", "cosmopolitan", "economychosun", "econovill", "harpersbazaar", "marieclairekorea", "mkeconomy", "thesingle", "vogue", "wkorea", "h21.hani",
   "elle.co.kr"],
-    //콘텐츠
     "video":["youtube", "tiktok", "netflix", "afreecatv", "bigo", "twitch", "tving", "coupangplay", "wavve", "seezntv", "lguplusmobiletv", "watcha", "now.naver", "tv.naver", 
     "serieson.naver", "spotvnow"],
     "music":["music-flo", "melon", "spotify", "music.youtube"],
     "webtoon_novel":["lezhin", "ridibooks", "manhwakyung", "bomtoon", "webtoon", "millie", "toptoon", "toomics", "series.naver"],
     "education":["mycake", "inflearn", "class101", "fastcampus", "ringleplus"],
     "audio":["spooncast", "welaaa", "audiobook"],
-    //장소
     "map":["map.naver", "map.kakao", "tmap"],
     "reservation":["tabling", "catchtable"],
-    //정보
     "homepage":["saramin", "albamon", "alba.", "jobkorea", "tworld", "wikidocs", "namu.wiki", "wikipidia", "wooricard", "wooribank", "hanacard", "hanabank", "kebhana", 
     "lottecard", "standardchartered", "kbstar", "shinhan", "citibank", "knbank", "kjbank", "dgb", "busanbank", "wordpress", "wikipedia", "seoul.go.kr", "jongno.go.kr",
      "junggu.seoul.kr", "yongsan.go.kr", "sd.go.kr", "gwangjin.go.kr", "ddm.go.kr", "jungnang.go.kr", "sb.go.kr", "gangbuk.go.kr", "dobong.go.kr", "nowon.kr", 
