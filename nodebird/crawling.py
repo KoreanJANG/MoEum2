@@ -4,9 +4,9 @@
 # In[3]:
 
 
-'''221121 ver1.34 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
+'''221121 ver1.35 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
 
-              수정) 1. 221116_nb_model_val.pkl 추가
+              수정) 1. 221121_nb_model_val.pkl 추가
               2. 
                      '''
 print("파이썬 구동 1")
@@ -34,9 +34,9 @@ import joblib
 
 print("파이썬 구동 2_라이브러리 불러오기")
 #머신러닝 모델 불러오기
-# loaded_model = joblib.load('C:/Users/FNUCNI/Desktop/python/221116_nb_model_val.pkl')
+# loaded_model = joblib.load('C:/Users/FNUCNI/Desktop/python/221121_nb_model_val.pkl')
 #라니 경로 추가
-loaded_model = joblib.load('/home/ec2-user/MoEum2/nodebird/221116_nb_model_val.pkl')
+loaded_model = joblib.load('/home/ec2-user/MoEum2/nodebird/221121_nb_model_val.pkl')
 print("파이썬 구동 3_머신러닝 모델 불러오기")
 
 # data - mysql DB 접속 #라니 오픈
