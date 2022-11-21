@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[3]:
+# In[4]:
 
 
 '''221116 ver1.32 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
@@ -137,7 +137,7 @@ except:
     Distributor_key = "해당 링크에서 직접 보기"
 Distributor.append(Distributor_key)
 
-
+print("파이썬 체크 1_json 호출 시작")
 # Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
 #제이 경로
 # with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
@@ -148,6 +148,7 @@ Distributor.append(Distributor_key)
 # #라니 경로
 with open('/home/ec2-user/MoEum2/nodebird/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
     keyword_data = json.load(json_file)
+print("파이썬 체크 2_json 호출 완료")
 
 #Categoty_out
 domain_dict = {}
