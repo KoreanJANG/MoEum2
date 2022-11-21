@@ -9,7 +9,7 @@
               수정) 1. 221116_nb_model_val.pkl 추가
               2. 
                      '''
-
+print("파이썬 구동 1")
 import requests
 import re
 import pymysql
@@ -32,10 +32,12 @@ import random
 #머신러닝추가
 import joblib
 
+print("파이썬 구동 2_라이브러리 불러오기")
 #머신러닝 모델 불러오기
 # loaded_model = joblib.load('C:/Users/FNUCNI/Desktop/python/221116_nb_model_val.pkl')
 #라니 경로 추가
 loaded_model = joblib.load('/home/ec2-user/MoEum2/nodebird/221116_nb_model.pkl')
+print("파이썬 구동 3_머신러닝 모델 불러오기")
 
 # data - mysql DB 접속 #라니 오픈
 try:
@@ -101,6 +103,7 @@ UserId = sys.argv[2]
 Mymemo = None
 MyThema = None
 
+print("파이썬 구동 4_node 파라미터 연동하기")
 
 start = time.time()  # 시작 시간 저장
 
