@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[4]:
+# In[3]:
 
 
-'''221116 ver1.32 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
+'''221121 ver1.34 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
 
-              수정) 1. keyword.json - domain_keyword 추가: 해당 도메인네임이 있으면 Type_key 구분 100% (Categoty_out 활용)
-              2. 기타 오류 코드 수정
+              수정) 1. 221116_nb_model_val.pkl 추가
+              2. 
                      '''
-
+print("파이썬 구동 1")
 import requests
 import re
 import pymysql
@@ -29,6 +29,15 @@ from user_agent import generate_user_agent, generate_navigator
 import datetime
 from collections import Counter, OrderedDict
 import random 
+#머신러닝추가
+import joblib
+
+print("파이썬 구동 2_라이브러리 불러오기")
+#머신러닝 모델 불러오기
+# loaded_model = joblib.load('C:/Users/FNUCNI/Desktop/python/221116_nb_model_val.pkl')
+#라니 경로 추가
+loaded_model = joblib.load('/home/ec2-user/MoEum2/nodebird/221116_nb_model_val.pkl')
+print("파이썬 구동 3_머신러닝 모델 불러오기")
 
 # data - mysql DB 접속 #라니 오픈
 try:
@@ -94,6 +103,7 @@ UserId = sys.argv[2]
 Mymemo = None
 MyThema = None
 
+print("파이썬 구동 4_node 파라미터 연동하기")
 
 start = time.time()  # 시작 시간 저장
 
@@ -137,7 +147,7 @@ except:
     Distributor_key = "해당 링크에서 직접 보기"
 Distributor.append(Distributor_key)
 
-print("파이썬 체크 1_json 호출 시작")
+
 # Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
 #제이 경로
 # with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
@@ -148,8 +158,7 @@ print("파이썬 체크 1_json 호출 시작")
 # #라니 경로
 with open('/home/ec2-user/MoEum2/nodebird/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
     keyword_data = json.load(json_file)
-print("파이썬 체크 2_json 호출 완료")
-
+print("파이썬 구동 5_json 불러오기")
 #Categoty_out
 domain_dict = {}
 for key, value in keyword_data['domain_keyword'].items():
@@ -222,7 +231,7 @@ try:
         pass
     print("Category_out_key에 따른 Type_key? ", Type_key)
     
-except:
+except: # ML 정확도 높으면 여기도 url링크가지고 ML돌리기
     if Category_in_key in ['news', 'cafe', 'blog', 'sns']:
         Type_key = "글"
 
@@ -704,22 +713,20 @@ else:
 # 설명 4번
 
 # Type 파악
-try:
-    if Category_out_key in ["shop", "second", "cross_border", "real_estate", "trip", "car", "rent", "class_learn", "delivery", "app_market", "air_ticket"]:
-        Type_key = "위시"
-    elif Category_out_key in ["news", "magazine"]:
-        Type_key = "글" #아티클
-    elif Category_out_key in ["video", "music", "webtoon_novel", "education", "audio"]:
-        Type_key = "동영상" #콘텐츠
-    elif Category_out_key in ["map", "reservation"]:
-        Type_key = "지도" #장소
-    elif Category_out_key in ["homepage", "blog", "cafe", "portal", "community", "sns"]:
-        Type_key = "기타" #정보
-    if Category_out_key != "해당 링크에서 직접 보기":
-        print("Category_out_key에 따른 Type_key? ", Type_key)
-    else:
-        pass
-except:
+
+if Category_out_key in ["shop", "second", "cross_border", "real_estate", "trip", "car", "rent", "class_learn", "delivery", "app_market", "air_ticket"]:
+    Type_key = "위시"
+elif Category_out_key in ["news", "magazine"]:
+    Type_key = "글" #아티클
+elif Category_out_key in ["video", "music", "webtoon_novel", "education", "audio"]:
+    Type_key = "동영상" #콘텐츠
+elif Category_out_key in ["map", "reservation"]:
+    Type_key = "지도" #장소
+elif Category_out_key in ["homepage", "blog", "cafe", "portal", "community", "sns"]:
+    Type_key = "기타" #정보
+if Category_out_key != "해당 링크에서 직접 보기":
+    print("(포함X) Category_out_key에 따른 Type_key? ", Type_key)
+else:
     try:
         count_all_shopping_second = Category_in_keyword_shopping_count + Category_in_keyword_second_count
         count_all_blog_sns_cafe_news = Category_in_keyword_blog_count + Category_in_keyword_sns_count + Category_in_keyword_cafe_count + Category_in_keyword_news_count
@@ -748,12 +755,13 @@ except:
 
         else:
             Type_key = "기타" #enter를 일단 기타로. image = 기타
+        print("(포함X) Category_in_key에 따른 Type_key? ", Type_key) #여기
     except:
         print("category_count 파악 불가")
         Type_key = "기타"
 
-Type.append(Type_key)
-print("Type 리스트 값은 ", Type)
+# Type.append(Type_key)
+# print("Type 리스트 값은 ", Type)
 
 #설명 5번
 
@@ -4125,7 +4133,7 @@ except:
 #     pass
 
 #duration
-if Type_key == '동영상': #콘텐츠
+if Category_in_key in ['video'] or Category_out_key in ['video']: #콘텐츠
 
     def duration_cal(time_key):
         time_key = time_key.replace("PT", "").replace("S", "")
@@ -4295,6 +4303,26 @@ print('최종 Title 리스트 값은, ', Title)
 print('최종 Description 리스트 값은, ', Description)
 print('최종 Thumbnail_image 리스트 값은, ', Thumbnail_image)
 print("최종 User_url", User_url)
+
+#Type 파악 머신러닝: in-> User_url, Title_key / out-> Type_key
+#url디코딩
+decode_url = parse.unquote(User_url)
+#분석용 정보 합치기
+
+combined = decode_url + Title[0]
+Ml_detail = []
+Ml_detail.append(combined)
+
+Type_key_ml = loaded_model.predict(Ml_detail)
+print("모델에 따른 Type_key는? ", Type_key_ml)
+
+if Type[0] == '기타' and Category_out_key not in ["homepage", "blog", "cafe", "portal", "community", "sns"]:
+    Type_key = Type_key_ml
+    Type.append(Type_key[0])
+else:
+    print("머신러닝 분류 DB입력 X")
+
+print("Type 리스트 값은 ", Type)
 
 #설명 6번
 # lprice & mall 파악
