@@ -140,14 +140,14 @@ Distributor.append(Distributor_key)
 
 # Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
 #제이 경로
-with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
-    keyword_data = json.load(json_file)
+# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+#     keyword_data = json.load(json_file)
 #토니 경로
 # with open('C:/Users\FNUCNI\Desktop\python/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 # #라니 경로
-# with open('/home/ec2-user/MoEum2/nodebird/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
-#     keyword_data = json.load(json_file)
+with open('/home/ec2-user/MoEum2/nodebird/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+    keyword_data = json.load(json_file)
 
 #Categoty_out
 domain_dict = {}
@@ -413,14 +413,14 @@ print("User_url_list_Distributor는 ", User_url_list_Distributor)
 # 설명 2번
 # Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
 #제이 경로
-with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
-    keyword_data = json.load(json_file)
+# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+#     keyword_data = json.load(json_file)
 #토니 경로
 # with open('C:/Users\FNUCNI\Desktop\python/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 # #라니 경로
-# with open('/home/ec2-user/MoEum2/nodebird/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
-#     keyword_data = json.load(json_file)
+with open('/home/ec2-user/MoEum2/nodebird/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+    keyword_data = json.load(json_file)
 
 # url - Distributor_keyword list match
 
