@@ -44,19 +44,20 @@ loaded_model = joblib.load('/home/ec2-user/MoEum2/nodebird/221125_nb_model_new.p
 print("파이썬 구동 3_머신러닝 모델 불러오기")
 
 # data - mysql DB 접속 #라니 오픈
-# try:
-#     db = pymysql.connect(host="moum3.cjk00gposwcb.ap-northeast-2.rds.amazonaws.com", user='admin', password='fnucni1234!', db='moum', charset='utf8mb4')
-#     cur = db.cursor()
-
-# except Exception as e:
-#     print("디비 접속 에러...")
-    
-try: #운영계
-    db = pymysql.connect(host="150.50.171.22", user='fnu_204129', password='Fnu204129*', db='moum', charset='utf8mb4')
+try:
+    db = pymysql.connect(host="moum3.cjk00gposwcb.ap-northeast-2.rds.amazonaws.com", user='admin', password='fnucni1234!', db='moum', charset='utf8mb4')
     cur = db.cursor()
 
 except Exception as e:
     print("디비 접속 에러...")
+    
+# try: #운영계
+#     db = pymysql.connect(host="1.234.63.21", user='fnu_204129', password='Fnu204129*', db='moum', charset='utf8mb4')
+#     cur = db.cursor()
+
+# except Exception as e:
+#     print("디비 접속 에러...")
+#     print(e)
 
 # 리스트 공간
 
