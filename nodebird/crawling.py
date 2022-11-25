@@ -234,26 +234,26 @@ try:
     if Category_out_key in ["shop", "second", "cross_border", "real_estate", "trip", "car", "rent", "class_learn", "delivery", "app_market", "air_ticket"]:
         Type_key = "위시"
     elif Category_out_key in ["news", "magazine"]:
-        Type_key = "글" #아티클
+        Type_key = "아티클" #아티클
     elif Category_out_key in ["video", "music", "webtoon_novel", "education", "audio"]:
-        Type_key = "동영상" #콘텐츠
+        Type_key = "콘텐츠" #콘텐츠
     elif Category_out_key in ["map", "reservation"]:
-        Type_key = "지도" #장소
+        Type_key = "장소" #장소
     elif Category_out_key in ["homepage", "blog", "cafe", "portal", "community", "sns"]:
-        Type_key = "기타" #정보
+        Type_key = "정보" #정보
     else:
         pass
     print("Category_out_key에 따른 Type_key? ", Type_key)
     
 except: # ML 정확도 높으면 여기도 url링크가지고 ML돌리기
     if Category_in_key in ['news']: # 'cafe', 'blog', 'sns' 는 지움. 로직에 따라 '기타' 로 감
-        Type_key = "글"
+        Type_key = "아티클"
 
     elif Category_in_key in ['shopping', 'second']:
         Type_key = "위시"
 
     elif Category_in_key in ['video', 'enter', 'reading']:
-        Type_key = "동영상" 
+        Type_key = "콘텐츠" 
 
     # elif Category_in_key in ['sns', 'image']:
     #     Type_key = "이미지"
@@ -263,10 +263,10 @@ except: # ML 정확도 높으면 여기도 url링크가지고 ML돌리기
     #     Type_key = "이미지"
 
     elif Category_in_key in ['map']:
-        Type_key = "지도"
+        Type_key = "장소"
 
     else:
-        Type_key = "기타" #enter를 일단 기타로. image = 기타
+        Type_key = "정보" #enter를 일단 기타로. image = 기타
 
 Type.append(Type_key)
 
@@ -732,13 +732,13 @@ else:
 if Category_out_key in ["shop", "second", "cross_border", "real_estate", "trip", "car", "rent", "class_learn", "delivery", "app_market", "air_ticket"]:
     Type_key = "위시"
 elif Category_out_key in ["news", "magazine"]:
-    Type_key = "글" #아티클
+    Type_key = "아티클" #아티클
 elif Category_out_key in ["video", "music", "webtoon_novel", "education", "audio"]:
-    Type_key = "동영상" #콘텐츠
+    Type_key = "콘텐츠" #콘텐츠
 elif Category_out_key in ["map", "reservation"]:
-    Type_key = "지도" #장소
+    Type_key = "장소" #장소
 elif Category_out_key in ["homepage", "blog", "cafe", "portal", "community", "sns"]:
-    Type_key = "기타" #정보
+    Type_key = "정보" #정보
 if Category_out_key != "해당 링크에서 직접 보기":
     print("(Type 리스트 포함X) Category_out_key에 따른 Type_key? ", Type_key)
 else:
@@ -750,13 +750,13 @@ else:
         count_all = [count_all_shopping_second, count_all_blog_sns_cafe_news, count_all_video_enter_reading, Category_in_keyword_map_count]
 
         if max(count_all) == 0:
-            Type_key = "기타"
+            Type_key = "정보"
         elif max(count_all) == count_all_blog_sns_cafe_news:
-            Type_key = '글'
+            Type_key = '아티클'
         elif max(count_all) == count_all_shopping_second:
             Type_key = '위시'
         elif max(count_all) == count_all_video_enter_reading:
-            Type_key = '동영상'   
+            Type_key = '콘텐츠'   
 
         # elif Category_in_key in ['sns', 'image']:
         #     Type_key = "이미지"
@@ -766,14 +766,14 @@ else:
         #     Type_key = "이미지"
 
         elif Category_in_key in ['map'] or max(count_all) == Category_in_keyword_map_count:
-            Type_key = "지도"
+            Type_key = "장소"
 
         else:
-            Type_key = "기타" #enter를 일단 기타로. image = 기타
+            Type_key = "정보" #enter를 일단 기타로. image = 기타
         print("(Type 리스트 포함X) Category_in_key에 따른 Type_key? ", Type_key) #여기
     except:
         print("category_count 파악 불가")
-        Type_key = "기타"
+        Type_key = "정보"
 
 # Type.append(Type_key)
 # print("Type 리스트 값은 ", Type)
@@ -1676,7 +1676,7 @@ try:
                 except:
                     Title_key = Title_key  
             
-        if Type_key == '기타' and Category_in_key != 'sns':
+        if Type_key == '정보' and Category_in_key != 'sns':
             Thumbnail_image_key = User_url
         else:
             try:
@@ -4365,7 +4365,7 @@ Ml_detail.append(combined)
 Type_key_ml = loaded_model.predict(Ml_detail)
 print("모델에 따른 Type_key는? ", Type_key_ml)
 
-if Type[0] == '기타' and Category_out_key not in ["homepage", "blog", "cafe", "portal", "community", "sns"]:
+if Type[0] == '정보' and Category_out_key not in ["homepage", "blog", "cafe", "portal", "community", "sns"]:
     Type_key = Type_key_ml
     Type.append(Type_key[0])
 else:
