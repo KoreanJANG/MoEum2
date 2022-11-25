@@ -1,15 +1,19 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[3]:
+# In[1]:
 
 
-'''221121 ver1.35 / chromedriver 경로 = 설정안함(설정 시, 서버 내 1. 크롬 버전 확인, 2. linux용 크롬드라이버 설치 필요)
+'''221125 ver1.37 / 개발
 
-              수정) 1. 221121_nb_model_val.pkl 추가
-              2. 
+              수정) 1. Naver sports 관련 크롤링 코드 수정 (duration 포함)
+              2. amazon 수정
+              3. 모델변경
+              4. 타입 최신화 221125_nb_model_new
+              5. 기타 코드 변경(naver partron)
+
                      '''
-print("파이썬 구동 1")
+print("파이썬 구동 1_시작")
 import requests
 import re
 import pymysql
@@ -34,14 +38,21 @@ import joblib
 
 print("파이썬 구동 2_라이브러리 불러오기")
 #머신러닝 모델 불러오기
-# loaded_model = joblib.load('C:/Users/FNUCNI/Desktop/python/221121_nb_model_val.pkl')
+# loaded_model = joblib.load('C:/Users/FNUCNI/Desktop/python/221125_nb_model_new.pkl')
 #라니 경로 추가
-loaded_model = joblib.load('/home/ec2-user/MoEum2/nodebird/221121_nb_model_val.pkl')
+loaded_model = joblib.load('/home/ec2-user/MoEum2/nodebird/221125_nb_model_new.pkl')
 print("파이썬 구동 3_머신러닝 모델 불러오기")
 
 # data - mysql DB 접속 #라니 오픈
-try:
-    db = pymysql.connect(host="moum3.cjk00gposwcb.ap-northeast-2.rds.amazonaws.com", user='admin', password='fnucni1234!', db='moum', charset='utf8mb4')
+# try:
+#     db = pymysql.connect(host="moum3.cjk00gposwcb.ap-northeast-2.rds.amazonaws.com", user='admin', password='fnucni1234!', db='moum', charset='utf8mb4')
+#     cur = db.cursor()
+
+# except Exception as e:
+#     print("디비 접속 에러...")
+    
+try: #운영계
+    db = pymysql.connect(host="150.50.171.22", user='fnu_204129', password='Fnu204129*', db='moum', charset='utf8mb4')
     cur = db.cursor()
 
 except Exception as e:
@@ -122,11 +133,14 @@ except:
     print('포맷수정된 User_url?, ', User_url)
 
 #Title_key
-try:
-    Title_key_default_re = re.compile('(?<=\/\/)(.*?)(?=\/)')
-    Title_key = Title_key_default_re.findall(User_url)[0]
-except:
-    Title_key = User_url
+if '//a.co/' in User_url:
+    Title_key = 'Amazon.com'
+else:
+    try:
+        Title_key_default_re = re.compile('(?<=\/\/)(.*?)(?=\/)')
+        Title_key = Title_key_default_re.findall(User_url)[0]
+    except:
+        Title_key = User_url
 Title.append(Title_key)    
 
 #Thumbnail_image
@@ -134,7 +148,7 @@ Thumbnail_image_key = 'https://lh3.googleusercontent.com/drive-viewer/AJc5JmQtu9
 Thumbnail_image.append(Thumbnail_image_key)
 
 #Distributor
-try:
+try: #디스트리뷰터 제이슨 키워드 매칭 시키기 test
     User_url_domain_re = re.compile('https?://([A-Za-z_0-9.-]+).*')
     User_url_domain = User_url_domain_re.findall(User_url)[0]
     User_url_domain_list = re.split('\.|/|\?|&|=', User_url_domain)
@@ -150,13 +164,13 @@ Distributor.append(Distributor_key)
 
 # Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
 #제이 경로
-# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 #토니 경로
-# with open('C:/Users\FNUCNI\Desktop\python/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+# with open('C:/Users\FNUCNI\Desktop\python/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 # #라니 경로
-with open('/home/ec2-user/MoEum2/nodebird/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+with open('/home/ec2-user/MoEum2/nodebird/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file:
     keyword_data = json.load(json_file)
 print("파이썬 구동 5_json 불러오기")
 #Categoty_out
@@ -197,7 +211,7 @@ Category_in_keyword_dict = {'image' : Category_in_keyword_list_images, 'news' : 
 #참고: Category_in_keyword_dict 의 vlaues 값 중복 시 마지막 하나만 표현(dict 고유의 성격), 따라서 key값이 마지막것으로 표현됨
 
 Category_in_keyword_match_list_cnt_dict = dict()
-User_url_list = re.split('\.|/|\?|&|=', User_url)
+User_url_list = re.split('\.|/|\?|&|=', User_url)[:10]
 
 for Category_in_keyword_list_all_i in Category_in_keyword_list_all:
     Category_in_keyword_match_list = list(set(User_url_list).intersection(Category_in_keyword_list_all_i))
@@ -232,7 +246,7 @@ try:
     print("Category_out_key에 따른 Type_key? ", Type_key)
     
 except: # ML 정확도 높으면 여기도 url링크가지고 ML돌리기
-    if Category_in_key in ['news', 'cafe', 'blog', 'sns']:
+    if Category_in_key in ['news']: # 'cafe', 'blog', 'sns' 는 지움. 로직에 따라 '기타' 로 감
         Type_key = "글"
 
     elif Category_in_key in ['shopping', 'second']:
@@ -273,7 +287,7 @@ sql = "INSERT INTO posts (Type, Category_in, Distributor, Publisher, Category_ou
 
 cur.execute(sql, all_list_tuple)
 db.commit()
-print('Title_key: ', Title_key, " / Distributor_key: ", Distributor_key, " / Category_in_key: ", Category_in_key, " / Type_key: ", Type_key)
+print('***디폴트 값 출력 *** Title_key: ', Title_key, " / Distributor_key: ", Distributor_key, " / Category_in_key: ", Category_in_key, " / Category_out_key: ", Category_out_key, " / Type_key: ", Type_key)
 print("default db commit 완료")
 
 #설명 1번
@@ -332,7 +346,7 @@ if 'msearch' in User_url:
 
 # url redirection 잡기
 
-if 'skyscanner' not in User_url: 
+if 'skyscanner' not in User_url and '//a.co/' not in User_url: 
     try:
         with urllib.request.urlopen(User_url, timeout = 3) as response:
             User_url_red = response.geturl()
@@ -397,7 +411,7 @@ if 'balaan' in User_url:
         
     print("balaan User_url은?", User_url)
 
-if 'a.co/' in User_url:   
+if '//a.co/' in User_url:   
     soup = BeautifulSoup(res.content, 'html.parser')
     try:
         User_url = 'https://www.amazon.com/' + str(soup.select_one('input[name="amzn-r"]')['value'])
@@ -423,13 +437,13 @@ print("User_url_list_Distributor는 ", User_url_list_Distributor)
 # 설명 2번
 # Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
 #제이 경로
-# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+# with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 #토니 경로
-# with open('C:/Users\FNUCNI\Desktop\python/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+# with open('C:/Users\FNUCNI\Desktop\python/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 # #라니 경로
-with open('/home/ec2-user/MoEum2/nodebird/221115_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+with open('/home/ec2-user/MoEum2/nodebird/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file:
     keyword_data = json.load(json_file)
 
 # url - Distributor_keyword list match
@@ -439,9 +453,10 @@ with open('/home/ec2-user/MoEum2/nodebird/221115_keyword.json', 'r', encoding='u
 try:
     soup = BeautifulSoup(res.content, 'html.parser')
     personal_headers_keywords = ['nike', 'blog.naver', '11st', 'musinsaapp']
-    if len(soup.text.replace("\n","").replace(" ","")) < 150 or any(personal_headers_keyword in User_url for personal_headers_keyword in personal_headers_keywords) == True:
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
-        print('헤더 개인으로 변경')
+    if 'a-bly.com' not in User_url and len(soup.text.replace("\n","").replace(" ","")) < 150 or any(personal_headers_keyword in User_url for personal_headers_keyword in personal_headers_keywords) == True:
+#         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
+        headers = {'User-Agent': headers_random}
+        print('헤더 랜덤 개인으로 변경')
         res = requests.get(User_url, headers=headers) 
         soup = BeautifulSoup(res.content, 'html.parser')
 except:
@@ -725,7 +740,7 @@ elif Category_out_key in ["map", "reservation"]:
 elif Category_out_key in ["homepage", "blog", "cafe", "portal", "community", "sns"]:
     Type_key = "기타" #정보
 if Category_out_key != "해당 링크에서 직접 보기":
-    print("(포함X) Category_out_key에 따른 Type_key? ", Type_key)
+    print("(Type 리스트 포함X) Category_out_key에 따른 Type_key? ", Type_key)
 else:
     try:
         count_all_shopping_second = Category_in_keyword_shopping_count + Category_in_keyword_second_count
@@ -755,7 +770,7 @@ else:
 
         else:
             Type_key = "기타" #enter를 일단 기타로. image = 기타
-        print("(포함X) Category_in_key에 따른 Type_key? ", Type_key) #여기
+        print("(Type 리스트 포함X) Category_in_key에 따른 Type_key? ", Type_key) #여기
     except:
         print("category_count 파악 불가")
         Type_key = "기타"
@@ -1445,6 +1460,38 @@ try:
             except:
                 Thumbnail_image_key = Thumbnail_image_key
                 
+    elif 'sports.naver.com' in User_url or 'sports.news.naver.com' in User_url: 
+        if 'vod' in User_url or 'video' in User_url: 
+            try:
+                product_id_re = re.compile('(?<=video\/)[0-9]+')
+                product_id = product_id_re.findall(User_url)[0] 
+                User_url_api = 'https://api-gw.sports.naver.com/video/' + str(product_id) + '?fields=all'
+            except:
+                product_id_re = re.compile('(?<=id=)[0-9]+')
+                product_id = product_id_re.findall(User_url)[0] 
+                User_url_api = 'https://api-gw.sports.naver.com/video/' + str(product_id) + '?fields=all'
+
+            res_api = requests.get(User_url_api, timeout=3, headers = headers) 
+            result_dict = json.loads(res_api.text)
+            try:
+                Title_key = result_dict['result']['title']
+            except:
+                pass
+            try:
+                Thumbnail_image_key = result_dict['result']['thumbnail']
+            except:
+                pass
+            try:
+                Duration_key = result_dict['result']['playTime']
+            except:
+                pass
+            
+    elif 'patron.naver' in User_url:      #네이버TV 후원하기 (베타테스트)   
+        try:
+            Title_key = soup.select_one('p.title').text
+        except:
+            Title_key = Title_key 
+                
     elif 'sflex.' in User_url: #특정 라이브 쇼핑사(최저가 포함 로직) 다른 distributors보다 앞에 있어야 함
         product_id_sflex_re = re.compile('(?<=const broadcastId = ).+(?=\;)')
         product_id_sflex = product_id_sflex_re.findall(str(soup))[0].strip('''"''')
@@ -2020,42 +2067,6 @@ try:
             except:
                 Thumbnail_image_key = Thumbnail_image_key
                     
-    elif Distributor_key in ['naver']:
-        naver_shopping_keywords = ['catalog', 'brand', 'store', 'smartstore']
-        if any(naver_shopping_keyword in User_url for naver_shopping_keyword in naver_shopping_keywords) == True:
-            script_re = re.compile('(?<=json">).*(?=<\/script>)')
-            script_text = script_re.findall(str(soup))[0]
-            dict_result_script_text = json.loads(script_text)
-
-            try:
-                Title_key = dict_result_script_text['name']
-            except:
-                try:
-                    Title_key = dict_result_script_text['props']['pageProps']['dehydratedState']['queries'][1]['state']['data']['catalog_Catalog']['productName']
-                except:
-                    try:
-                        Title_key = dict_result_script_text['props']['pageProps']['catalog']['productName']
-                    except:
-                        try:
-                            Title_key = dict_result_script_text['props']['pageProps']['ogTag']['title']
-                        except:
-                            Title_key = Title_key
-            try:
-                Thumbnail_image_key = dict_result_script_text['image']
-            except:
-                try:
-                    Thumbnail_image_key = dict_result_script_text['props']['pageProps']['ogTag']['image']
-                except:
-                    Thumbnail_image_key =Thumbnail_image_key
-
-            try:
-                Description_key = dict_result_script_text['description']
-            except:
-                try:
-                    Description_key = dict_result_script_text['props']['pageProps']['ogTag']['description']
-                except:
-                    Description_key = Description_key
-
     elif 'wconcept' in User_url:
         try:
             script_re = re.compile('(?<=content_name: ).*(?=\,)')
@@ -2609,27 +2620,27 @@ try:
             Thumbnail_image_key = Thumbnail_image_key             
             
     elif 'amazon' in User_url:  
-        try: # referer 포함된 requests
-            time.sleep(1)
-#             headers = {'user-agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', 'Referer': 'https://www.naver.com/'}
-#             res = requests.get(User_url, timeout=3, headers=headers) 
-            soup = BeautifulSoup(res.text, 'html.parser')
-            print('amazon referer 포함 requests 전송')
-        except: # selenium
-            options = webdriver.ChromeOptions()
-            options.add_argument('headless')
-            options.add_argument('disable-gpu')
-            options.add_argument('User-Agent: facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)')
-            options.add_argument('lang = ko_KR')
+#         try: # referer 포함된 requests
+#             time.sleep(1)
+# #             headers = {'user-agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', 'Referer': 'https://www.naver.com/'}
+# #             res = requests.get(User_url, timeout=3, headers=headers) 
+#             soup = BeautifulSoup(res.text, 'html.parser')
+#             print('amazon referer 포함 requests 전송')
+#         except: # selenium
+#             options = webdriver.ChromeOptions()
+#             options.add_argument('headless')
+#             options.add_argument('disable-gpu')
+#             options.add_argument('User-Agent: facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)')
+#             options.add_argument('lang = ko_KR')
 
-            driver = webdriver.Chrome(chromedriver, options=options)
-            driver.get(User_url)
-            res = driver.page_source
-            soup = BeautifulSoup(res, 'html.parser')
-            script_re = re.compile('(?<=jQuery.parseJSON\(\').+(?=\'\);)')
-            script_text = script_re.findall(str(soup))[0]
-            dict_result_script_text = json.loads(script_text)
-            driver.quit()
+#             driver = webdriver.Chrome(chromedriver, options=options)
+#             driver.get(User_url)
+#             res = driver.page_source
+#             soup = BeautifulSoup(res, 'html.parser')
+#             script_re = re.compile('(?<=jQuery.parseJSON\(\').+(?=\'\);)')
+#             script_text = script_re.findall(str(soup))[0]
+#             dict_result_script_text = json.loads(script_text)
+#             driver.quit()
         try:
             Title_key = soup.select_one('meta[name="title"]')['content']
         except:
@@ -2913,7 +2924,7 @@ try:
         if 'ticket' in User_url:
             product_id_ticketip_re = re.compile('(?<=goods\/)\d+')
             product_id_ticketip = product_id_ticketip_re.findall(User_url)[0]
-            User_url_api = 'https://api-ticketfront.interpark.com/v1/goods/' + str(product_id_ticketip) + '/summary?goodsCode=22004761&priceGrade=&seatGrade='
+            User_url_api = 'https://api-ticketfront.interpark.com/v1/goods/' + str(product_id_ticketip) + '/summary?goodsCode=' + str(product_id_ticketip) + '&priceGrade=&seatGrade='
             res_api = requests.get(User_url_api, timeout=3, headers = headers) 
             result_dict = json.loads(res_api.text)
             try:
@@ -3956,7 +3967,42 @@ try:
             Thumbnail_image_key = dict_post_api['data']['product']['product']['headerContents'][0]['content']['thumbnail']
         except:
             Thumbnail_image_key = Thumbnail_image_key
-                
+                        
+    elif Distributor_key in ['naver']:
+        naver_shopping_keywords = ['catalog', 'brand', 'store', 'smartstore']
+        if any(naver_shopping_keyword in User_url for naver_shopping_keyword in naver_shopping_keywords) == True:
+            script_re = re.compile('(?<=json">).*(?=<\/script>)')
+            script_text = script_re.findall(str(soup))[0]
+            dict_result_script_text = json.loads(script_text)
+
+            try:
+                Title_key = dict_result_script_text['name']
+            except:
+                try:
+                    Title_key = dict_result_script_text['props']['pageProps']['dehydratedState']['queries'][1]['state']['data']['catalog_Catalog']['productName']
+                except:
+                    try:
+                        Title_key = dict_result_script_text['props']['pageProps']['catalog']['productName']
+                    except:
+                        try:
+                            Title_key = dict_result_script_text['props']['pageProps']['ogTag']['title']
+                        except:
+                            Title_key = Title_key
+            try:
+                Thumbnail_image_key = dict_result_script_text['image']
+            except:
+                try:
+                    Thumbnail_image_key = dict_result_script_text['props']['pageProps']['ogTag']['image']
+                except:
+                    Thumbnail_image_key =Thumbnail_image_key
+
+            try:
+                Description_key = dict_result_script_text['description']
+            except:
+                try:
+                    Description_key = dict_result_script_text['props']['pageProps']['ogTag']['description']
+                except:
+                    Description_key = Description_key
 #3요소소
             
 ##코리아센터 (메이크샵)공통 -------------------------------------------------------------------------
@@ -4152,38 +4198,38 @@ if Category_in_key in ['video'] or Category_out_key in ['video']: #콘텐츠
             Duration_key = ""
 
     elif Distributor_key == "naver":
-        if 'now' in User_url or 'tv'in User_url:
-
+        
+        naver_duration_keywords = ['now', 'tv', 'sports', 'vod', 'video']
+        if any(naver_duration_keyword in User_url for naver_duration_keyword in naver_duration_keywords) == True:
             try:
                 time_key = soup.select_one('meta[property="naver:video:play_time"]')['content']
                 Duration_key = str(datetime.timedelta(seconds=int(time_key)))
             except:
-                Duration_key = ""
-
-
-            try:
-                # naver.com/vod 
-                script_re = re.compile('(?<=vod = ).+(?=;)')
-                script_text = script_re.findall(str(soup))[0]
-                dict_result_script_text = json.loads(script_text)
-
-                Title_key = dict_result_script_text['title']
-
-                Thumbnail_image_key = dict_result_script_text['thumbnail']
-
-                Description_key = dict_result_script_text['searchData']
                 try:
-                    Duration_key = dict_result_script_text['playTime']
+                    # naver.com/vod 
+                    script_re = re.compile('(?<=vod = ).+(?=;)')
+                    script_text = script_re.findall(str(soup))[0]
+                    dict_result_script_text = json.loads(script_text)
+
+                    Title_key = dict_result_script_text['title']
+                    Thumbnail_image_key = dict_result_script_text['thumbnail']
+                    Description_key = dict_result_script_text['searchData']
                 except:
                     try:
-                        Duration_key = str(dict_result_script_text['playTimeMinute']) + ':' + str(dict_result_script_text['playTimeSecond']) +'초'
+                        Duration_key = dict_result_script_text['playTime']
                     except:
                         try:
-                            Duration_key = str(dict_result_script_text['playTimeToSecond']) 
+                            Duration_key = str(dict_result_script_text['playTimeMinute']) + ':' + str(dict_result_script_text['playTimeSecond']) +'초'
                         except:
-                            Duration_key = ""
-            except:
-                Duration_key = ""
+                            try:
+                                Duration_key = str(dict_result_script_text['playTimeToSecond']) 
+                            except:
+                                try:
+                                    Duration_key = result_dict['result']['playTime'] #sports
+                                except:
+                                    Duration_key = ""
+        else:
+            Duration_key = ""
 
     elif 'tv.nate' in User_url:
         try:
@@ -4232,7 +4278,7 @@ if Category_in_key in ['video'] or Category_out_key in ['video']: #콘텐츠
                         Duration_key = ""           
     else:
         Duration_key = ""
-
+    
     if Duration_key != "":
         Duration.append(Duration_key)
         print("Duration 리스트 값은, ", Duration) 
@@ -4254,7 +4300,7 @@ for Title_key_trash_word in Title_key_trash_words:
 
 #Title_key 디폴트 값
 
-if Title_key == '해당 링크에서 직접 보기' or 'denied' in Title_key or 'Denied' in Title_key:
+if Title_key == '해당 링크에서 직접 보기' or 'denied' in Title_key or 'Denied' in Title_key or 'Just a moment' in Title_key:
     try:
         Title_key_default_re = re.compile('(?<=\/\/)(.*?)(?=\/)')
         Title_key_default = Title_key_default_re.findall(User_url)[0]
@@ -4266,11 +4312,14 @@ if Title_key == '해당 링크에서 직접 보기' or 'denied' in Title_key or 
 Title.append(Title_key.strip())    
 
 # Desc. trash_word 제거
-desc_trash_words = keyword_data['Trash_keyword']['Destributor']['Kor'] + keyword_data['Trash_keyword']['Destributor']['Eng']
-for desc_trash_word in desc_trash_words:
-    Description_key = Description_key.replace(desc_trash_word, "")
-    
-Description.append(Description_key.strip())
+try:
+    desc_trash_words = keyword_data['Trash_keyword']['Destributor']['Kor'] + keyword_data['Trash_keyword']['Destributor']['Eng']
+    for desc_trash_word in desc_trash_words:
+        Description_key = Description_key.replace(desc_trash_word, "")
+    Description.append(Description_key.strip())
+
+except:
+    pass
 
 # Thumbnail_image  input
 Thumbnail_image_extention_list = keyword_data['Condition_keyword']['Thumbnail_image_extention_list']['Kor'] + keyword_data['Condition_keyword']['Thumbnail_image_extention_list']['Eng']
@@ -5177,7 +5226,11 @@ if Type_key == '위시':
                 try:
                     Lower_price_key = soup.select_one('input#twister-plus-price-data-price')['value']
                 except:
-                    Lower_price_key = Lower_price_key
+                    try:
+                        Lower_price_key = soup.select_one('span.a-offscreen').text
+                    except:
+                        Lower_price_key = Lower_price_key
+                        
             elif 'idus' in User_url:              
                 try:
                     Lower_price_key= soup.select_one('.sold-price').text
@@ -5326,7 +5379,6 @@ if Type_key == '위시':
                         except:
                              Lower_price_key = Lower_price_key  
                 else:
-                    print('test 인터파크')
                     try:
                         Lower_price_key = dict_result_script_text['productInfoPriceDto']['dcPrice']
                     except:
@@ -6486,7 +6538,7 @@ if Type_key == '위시':
                                 Lower_url_searched_key = naver_shopping_list_dict_list['crUrl']      
                     else:
                         Title_searched_key = '비교된 상품이 없어요'
-                        Lower_price_searched_key = '비교된 상품이 없어요'
+                        Lower_price_searched_key = '--' # 중복으로 나오니 보기 지저분해져서 수정
                         Lower_mall_searched_key = '비교된 상품이 없어요'
                         Lower_url_searched_key = '비교된 상품이 없어요'
         #         # ip 차단으로 인해 하기 코드 사용 불가
@@ -6599,17 +6651,17 @@ if Type_key == '위시':
             else:        
                 Lower_price_searched_key = int(float(Lower_price_searched_key))   
 
-            # price 비교: 둘 다 int 이며 0이 아닐 경우 시행
+            # price 비교: 둘 다 int 이며 0이 아닐 경우 시행 -> 221125 비교가 다 보여주기
 
-            if type(Lower_price_key) and type(Lower_price_searched_key) == int:
-                try: 
-                    if Lower_price_key < Lower_price_searched_key and Lower_price_key & Lower_price_searched_key != 0:
-                        Lower_price_searched_key = Lower_price_key
-                        Lower_mall_searched_key = Distributor_key
-                        Lower_url_searched_key = User_url
-                        print("가격 비교 성공")
-                except:
-                    print("가격 비교 불가")
+#             if type(Lower_price_key) and type(Lower_price_searched_key) == int:
+#                 try: 
+#                     if Lower_price_key < Lower_price_searched_key and Lower_price_key & Lower_price_searched_key != 0:
+#                         Lower_price_searched_key = Lower_price_key
+#                         Lower_mall_searched_key = Distributor_key
+#                         Lower_url_searched_key = User_url
+#                         print("가격 비교 성공")
+#                 except:
+#                     print("가격 비교 불가")
             
         else:
             if Lower_price_key == '확인필요':
@@ -6924,6 +6976,5 @@ db.close()
 
 # db.commit() 
 # print("save complete")
-
 # db.close()
 
