@@ -4,13 +4,14 @@
 # In[1]:
 
 
-'''221125 ver1.37 / 개발
+'''221128 ver1.38 / 서버
 
               수정) 1. Naver sports 관련 크롤링 코드 수정 (duration 포함)
               2. amazon 수정
               3. 모델변경
-              4. 타입 최신화 221125_nb_model_new
+              4. 타입 최신화 221125_nb_model_new (article 수정)
               5. 기타 코드 변경(naver partron)
+              6. 네이버 쇼핑 api 로직 변경(catalog 삭제)
 
                      '''
 print("파이썬 구동 1_시작")
@@ -40,10 +41,11 @@ print("파이썬 구동 2_라이브러리 불러오기")
 #머신러닝 모델 불러오기
 # loaded_model = joblib.load('C:/Users/FNUCNI/Desktop/python/221125_nb_model_new.pkl')
 #라니 경로 추가
-loaded_model = joblib.load('/home/ec2-user/MoEum2/nodebird/221125_nb_model_new.pkl')
+loaded_model = joblib.load('/home/ec2-user/MoEum2/nodebird/221125_nb_model_new.pkl') #서버
+# loaded_model = joblib.load('/home/fnu_204129/nodebird/nodebird/221125_nb_model_val.pkl') #운영
 print("파이썬 구동 3_머신러닝 모델 불러오기")
 
-# data - mysql DB 접속 #라니 오픈
+# # data - mysql DB 접속 #라니 오픈
 try:
     db = pymysql.connect(host="moum3.cjk00gposwcb.ap-northeast-2.rds.amazonaws.com", user='admin', password='fnucni1234!', db='moum', charset='utf8mb4')
     cur = db.cursor()
@@ -149,7 +151,7 @@ Thumbnail_image_key = 'https://lh3.googleusercontent.com/drive-viewer/AJc5JmQtu9
 Thumbnail_image.append(Thumbnail_image_key)
 
 #Distributor
-try: #디스트리뷰터 제이슨 키워드 매칭 시키기 test
+try: #디스트리뷰터 제이슨 키워드 매칭 시키기
     User_url_domain_re = re.compile('https?://([A-Za-z_0-9.-]+).*')
     User_url_domain = User_url_domain_re.findall(User_url)[0]
     User_url_domain_list = re.split('\.|/|\?|&|=', User_url_domain)
@@ -163,7 +165,7 @@ except:
 Distributor.append(Distributor_key)
 
 
-# Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
+# Keyword 데이터 호출 
 #제이 경로
 # with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
@@ -171,8 +173,11 @@ Distributor.append(Distributor_key)
 # with open('C:/Users\FNUCNI\Desktop\python/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 # #라니 경로
-with open('/home/ec2-user/MoEum2/nodebird/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+with open('/home/ec2-user/MoEum2/nodebird/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file: #서버
     keyword_data = json.load(json_file)
+# with open('/home/fnu_204129/nodebird/nodebird/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file: #운영
+#     keyword_data = json.load(json_file)
+    
 print("파이썬 구동 5_json 불러오기")
 #Categoty_out
 domain_dict = {}
@@ -436,7 +441,7 @@ User_url_list_Distributor = User_url_list[0:7]
 print("User_url_list_Distributor는 ", User_url_list_Distributor)
 
 # 설명 2번
-# Keyword 데이터 호출 # 라니 파일 주고 서버에 저장 후 서버 경로 입력
+# Keyword 데이터 호출 
 #제이 경로
 # with open('C:/Users/FNUCNI/Desktop/python_crawling_ver/keyword/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
@@ -444,8 +449,10 @@ print("User_url_list_Distributor는 ", User_url_list_Distributor)
 # with open('C:/Users\FNUCNI\Desktop\python/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file:
 #     keyword_data = json.load(json_file)
 # #라니 경로
-with open('/home/ec2-user/MoEum2/nodebird/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file:
+with open('/home/ec2-user/MoEum2/nodebird/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file: #서버
     keyword_data = json.load(json_file)
+# with open('/home/fnu_204129/nodebird/nodebird/221125_keyword.json', 'r', encoding='utf-8-sig') as json_file: #운영
+#     keyword_data = json.load(json_file)
 
 # url - Distributor_keyword list match
 
@@ -456,6 +463,7 @@ try:
     personal_headers_keywords = ['nike', 'blog.naver', '11st', 'musinsaapp']
     if 'a-bly.com' not in User_url and len(soup.text.replace("\n","").replace(" ","")) < 150 or any(personal_headers_keyword in User_url for personal_headers_keyword in personal_headers_keywords) == True:
 #         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
+        headers_random_list()
         headers = {'User-Agent': headers_random}
         print('헤더 랜덤 개인으로 변경')
         res = requests.get(User_url, headers=headers) 
@@ -6488,13 +6496,21 @@ if Type_key == '위시':
                     User_url_naver = 'https://search.shopping.naver.com/search/all?query=' + str(Title_chosen_key)
                     print("네이버쇼핑 검색 결과 주소?", User_url_naver)
 
-                    headers = {'user-agent': generate_user_agent(device_type='smartphone')}
+                    try:
+                        headers_random_list()
+                        headers = {'User-Agent': headers_random}
+                        print('개인UA 활용')
+                    except:
+                        headers = {'user-agent': generate_user_agent(device_type='smartphone')}
+                        print('랜덤UA 활용')
                     res = requests.get(User_url_naver, headers=headers) 
                     print("네이버쇼핑 검색 결과접속 상태?", res.status_code)
                     soup = BeautifulSoup(res.content, 'html.parser')
-
-                    script = soup.select_one('script[type="application/json"]').text
-                    dict_result_script_text = json.loads(str(script))
+                    try:
+                        script = soup.select_one('script[type="application/json"]').text
+                        dict_result_script_text = json.loads(str(script))
+                    except:
+                        print("naver 쇼핑 검색 script scraping 불가, api 구동 필요")
                     try:
                         naver_shopping_list_dict_list =  dict_result_script_text['props']['pageProps']['initialState']['products']['list'][0:]
                     except:
@@ -6614,25 +6630,25 @@ if Type_key == '위시':
                             except:
                                 Lower_url_searched_key = '비교가를 찾을 수 없어요'
 
-                            try: #gate주소가 아닌  naver_catalog 주소 파악
-                                product_id_naver_mall_url_re = re.compile('(?<=id=)[0-9]+')
-                                product_id_naver_mall_url = product_id_naver_mall_url_re.findall(Lower_url_searched_key)[0]
-                                Lower_url_searched_key_temp = 'https://search.shopping.naver.com/catalog/' + str(product_id_naver_mall_url)
-                                res = requests.get(Lower_url_searched_key_temp, timeout=3, headers=headers) 
-                                soup = BeautifulSoup(res.text, 'html.parser')
-                                if '존재하지 않습니다' in str(soup): 
-                                    print('Lower_url_searched_key_temp는 gate 주소, mall 직접 연결할 주소 파악 시작')
-                                    res = requests.get(Lower_url_searched_key, timeout=3, headers=headers) 
-                                    soup = BeautifulSoup(res.text, 'html.parser')
-                                    script_text = soup.select_one('script[type="application/json"]').text
-                                    dict_result_script_text = json.loads(script_text)
-                                    Lower_url_searched_key = dict_result_script_text['props']['pageProps']['product']['productUrl']
-                                else:
-                                    print('naver_catalog 주소 파악')
-                                    Lower_url_searched_key = Lower_url_searched_key_temp           
-                            except:
-                                print('naver_catalog 주소 파악')
-                                Lower_url_searched_key = Lower_url_searched_key
+#                             try: #gate주소가 아닌  naver_catalog 주소 파악   -> 221128 직접 몰 연결할 경우 catalog url 찾을수 없음
+#                                 product_id_naver_mall_url_re = re.compile('(?<=id=)[0-9]+')
+#                                 product_id_naver_mall_url = product_id_naver_mall_url_re.findall(Lower_url_searched_key)[0]
+#                                 Lower_url_searched_key_temp = 'https://search.shopping.naver.com/catalog/' + str(product_id_naver_mall_url)
+#                                 res = requests.get(Lower_url_searched_key_temp, timeout=3, headers=headers) 
+#                                 soup = BeautifulSoup(res.text, 'html.parser')
+#                                 if '존재하지 않습니다' in str(soup): 
+#                                     print('Lower_url_searched_key_temp는 gate 주소, mall 직접 연결할 주소 파악 시작')
+#                                     res = requests.get(Lower_url_searched_key, timeout=3, headers=headers) 
+#                                     soup = BeautifulSoup(res.text, 'html.parser')
+#                                     script_text = soup.select_one('script[type="application/json"]').text
+#                                     dict_result_script_text = json.loads(script_text)
+#                                     Lower_url_searched_key = dict_result_script_text['props']['pageProps']['product']['productUrl']
+#                                 else:
+#                                     print('naver_catalog 주소 파악')
+#                                     Lower_url_searched_key = Lower_url_searched_key_temp           
+#                             except:
+#                                 print('naver_catalog 주소 파악')
+#                                 Lower_url_searched_key = Lower_url_searched_key
                     except:
                         Title_searched_key = '비교된 상품이 없어요'
                         Lower_price_searched_key = '비교된 상품이 없어요'
